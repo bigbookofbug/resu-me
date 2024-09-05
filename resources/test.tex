@@ -2,6 +2,7 @@
 \documentclass[a4paper, 12pt]{article}
 \usepackage{setspace}
 \usepackage{times}
+\usepackage{multicol}
 \usepackage[utf8]{inputenc}
 \usepackage[
   left=2.5cm,
@@ -10,14 +11,42 @@
   bottom=2.5cm, bindingoffset=0.5cm]{geometry}
 \usepackage{soul}
 \renewcommand{\baselinestretch}{1}
-\begin{document}
 \pagenumbering{gobble}
+\begin{document}
 \begin{flushright}
 \setstretch{0.5}
 {\fontsize{12pt}{12pt}\selectfont
 \item 555-555-5555
  \item bigbookofbug@proton.me
  \item mywebsite.site
- \end{flushright}
+ }\end{flushright}
 \vspace{-40pt}
+\begin{flushleft}
+\setstretch{0.5}
+{\fontsize{16pt}{16pt}\selectfont
+{\textbf{Big Bug}}}
+\noindent\rule{\textwidth}{0.4pt}
+\end{flushleft}
+\begin{flushleft}
+\setstretch{0.5}
+{\fontsize{12pt}{12pt}\selectfont
+This is a summary of myself. This summary takes the form of a short paragraph that will go over relevant interests and skillsets. This can be used as a sort of "elevator pitch" for oneself, and should provide an overview of what one can do.}
+\newline
+\end{flushleft}
+\begin{flushleft}
+\setstretch{0.5}
+{\fontsize{12pt}{12pt}\selectfont
+\textbf{Education}}
+\noindent\rule{\textwidth}{0.4pt}
+\end{flushleft}
+\begin{flushleft}
+{\textbf{University of Bug at Bugzone \hfill 2019}}
+\newline
+BS, Entymology\begin{multicols}{2}
+\begin{itemize}
+\item GPA: 4.0
+ \item Minor in Behavioral Psychology
+ \end{itemize}
+\end{multicols}
+\end{flushleft}
 \end{document}

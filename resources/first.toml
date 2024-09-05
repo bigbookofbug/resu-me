@@ -12,7 +12,7 @@ contact = [
 [Summary_Section]
 summary = "This is a summary of myself. This summary takes the form of a short paragraph that will go over relevant interests and skillsets. This can be used as a sort of \"elevator pitch\" for oneself, and should provide an overview of what one can do."
 
-[Eductation_Section]
+[Education_Section]
 institute = "University of Bug at Bugzone"
 area = "Entymology"
 degree = "BS"
@@ -22,8 +22,6 @@ highlights = [
 "GPA: 4.0",
 "Minor in Behavioral Psychology"
 ]
-
-[Experience_Section]
 
 [Experience.1]
 company = "Bug enterprise, inc"
