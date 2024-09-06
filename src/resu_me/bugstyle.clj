@@ -65,3 +65,42 @@
                                             (get-in resume-parsed [:Education_Section :highlights]))
                                            "\\end{itemize}\n"
                                            "\\end{multicols}\n")))))))))
+
+(defn write-experience
+  [file resume-parsed cnt]
+  (if (>= (count (get-in
+                  resume-parsed [:Experience]))
+          cnt )
+    (do (with-open [wrtr (io/writer file :append true)]
+          (.write wrtr
+                  (str (common/flush-dir "left" (str
+                                                 "\\setstretch{0.5}\n"
+                                                 "{\\textbf{"(common/parse-experience
+                                                              resume-parsed
+                                                              :company cnt) ",} "
+                                                 (common/parse-experience
+                                                  resume-parsed
+                                                  :location cnt) " \\hfill \n"
+                                                 "\\textbf{"
+                                                 (common/parse-experience
+                                                  resume-parsed :start cnt) " --- "
+                                                 (common/parse-experience
+                                                  resume-parsed :end cnt) "}}\n"
+                                                 "\\newline\n"
+                                                 "\\textit{"(common/parse-experience
+                                                  resume-parsed :title cnt) "}\n"
+                                                 "\\begin{itemize}\n"
+                                                 (common/parse-list
+                                                  (common/parse-experience
+                                                   resume-parsed :duties cnt))
+                                                 "\\end{itemize}\n")))))
+        (write-experience file resume-parsed (inc cnt)))))
+
+(defn write-experience-header
+  [file]
+  (with-open [wrtr (io/writer file :append true)]
+    (.write wrtr
+                (str (common/flush-dir "left" (str
+                                               "\\setstretch{0.5}\n"
+                                               "{\\fontsize{12pt}{12pt}\\selectfont \\textbf{Work Experience}}\n"
+                                               common/line-sep))))))

@@ -31,15 +31,9 @@
 (defn parse-list
   "internal fucntion, to turn an item into a list. call to it may look something like:
   (parse-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
-  ([lst len strn]
-   (let [res strn]
-     (if (>= len (count lst))
-       res
-       (parse-list lst (inc len) (str res "\\item " (nth lst len) "\n ")))))
-  ([lst]
-   (let [res nil
-         len 0]
-     (parse-list lst (inc len) (str res "\\item " (nth lst len) "\n ")))))
+  [lst]
+  (apply str
+         (map #(str "\\item " % "\n") lst)))
 
 (def line-sep "\\noindent\\rule{\\textwidth}{0.4pt}\n")
 
@@ -54,3 +48,20 @@
   (str
    (get-in resume-parsed [:Education_Section section])))
 
+(defn parse-experience
+                [resume-parsed exp cnt]
+                (get-in resume-parsed [:Experience (keyword (str cnt)) exp]))
+
+;skeleton of a structure
+; (defn parse-experience-seq
+;   ([resume-parsed]
+;    (let [cnt
+;            (count (get-in resume-parsed [:Experience]))]
+;      (if (>= cnt 0)
+;        (do (println (parse-experience resume-parsed :company cnt))
+;        (parse-experience-seq resume-parsed (dec cnt))))))
+;   ([resume-parsed cnt]
+;    (let [cout cnt]
+;      (if (>= cnt 0)
+;        (do (println (parse-experience resume-parsed :company cout))
+;        (parse-experience-seq resume-parsed (dec cout)))))))
