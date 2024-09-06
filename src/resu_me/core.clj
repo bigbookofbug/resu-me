@@ -29,8 +29,3 @@
 (def resume-parsed
                 (parse-config "/home/bigbug/Documents/resu-me/resources/first.toml"))
 (def test-file "/home/bigbug/Documents/resu-me/resources/test.tex")
-
-;;figure out how to iterate over contact items
-;(def cont-header (str
-;                  (get-in resume-parsed [:Personal :name]) "\n"
-;                  (first (get-in resume-parsed [:Personal :contact]))))

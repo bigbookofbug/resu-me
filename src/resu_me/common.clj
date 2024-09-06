@@ -52,16 +52,7 @@
                 [resume-parsed exp cnt]
                 (get-in resume-parsed [:Experience (keyword (str cnt)) exp]))
 
-;skeleton of a structure
-; (defn parse-experience-seq
-;   ([resume-parsed]
-;    (let [cnt
-;            (count (get-in resume-parsed [:Experience]))]
-;      (if (>= cnt 0)
-;        (do (println (parse-experience resume-parsed :company cnt))
-;        (parse-experience-seq resume-parsed (dec cnt))))))
-;   ([resume-parsed cnt]
-;    (let [cout cnt]
-;      (if (>= cnt 0)
-;        (do (println (parse-experience resume-parsed :company cout))
-;        (parse-experience-seq resume-parsed (dec cout)))))))
+
+(defn skills?
+  [resume-parsed]
+  (get-in resume-parsed [:has_skill]))

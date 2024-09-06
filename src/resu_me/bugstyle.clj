@@ -1,6 +1,5 @@
 (ns resu-me.bugstyle
-  (:require [toml-clj.core :as toml]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [resu-me.common :as common]))
 
 (defn write-header
@@ -67,34 +66,27 @@
                                            "\\end{multicols}\n")))))))))
 
 (defn write-experience
-  [file resume-parsed cnt]
-  (if (>= (count (get-in
-                  resume-parsed [:Experience]))
-          cnt )
-    (do (with-open [wrtr (io/writer file :append true)]
-          (.write wrtr
-                  (str (common/flush-dir "left" (str
-                                                 "\\setstretch{0.5}\n"
-                                                 "{\\textbf{"(common/parse-experience
-                                                              resume-parsed
-                                                              :company cnt) ",} "
-                                                 (common/parse-experience
-                                                  resume-parsed
-                                                  :location cnt) " \\hfill \n"
-                                                 "\\textbf{"
-                                                 (common/parse-experience
-                                                  resume-parsed :start cnt) " --- "
-                                                 (common/parse-experience
-                                                  resume-parsed :end cnt) "}}\n"
-                                                 "\\newline\n"
-                                                 "\\textit{"(common/parse-experience
-                                                  resume-parsed :title cnt) "}\n"
-                                                 "\\begin{itemize}\n"
-                                                 (common/parse-list
-                                                  (common/parse-experience
-                                                   resume-parsed :duties cnt))
-                                                 "\\end{itemize}\n")))))
-        (write-experience file resume-parsed (inc cnt)))))
+  ([file resume-parsed cnt]
+   (let [parse-exp
+         #(common/parse-experience resume-parsed % cnt)]
+     (if (>= (count (get-in resume-parsed [:Experience]))
+             cnt)
+       (do (with-open [wrtr (io/writer file :append true)]
+             (.write wrtr
+                     (str (common/flush-dir "left" (str
+                                                    "\\setstretch{0.5}\n"
+                                                    "{\\textbf{"(parse-exp :company)",} "
+                                                    (parse-exp :location)" \\hfill \n"
+                                                    "\\textbf{"(parse-exp :start)" --- "(parse-exp :end)"}}\n"
+                                                    "\\newline\n"
+                                                    "\\textit{"(parse-exp :title)"}\n"
+                                                    "\\begin{itemize}\n"
+                                                    (common/parse-list
+                                                     (parse-exp :duties))
+                                                    "\\end{itemize}\n")))))
+           (write-experience file resume-parsed (inc cnt))))))
+  ([file resume-parsed]
+   (write-experience file resume-parsed 1)))
 
 (defn write-experience-header
   [file]
@@ -104,3 +96,32 @@
                                                "\\setstretch{0.5}\n"
                                                "{\\fontsize{12pt}{12pt}\\selectfont \\textbf{Work Experience}}\n"
                                                common/line-sep))))))
+(defn write-skills
+  [file resume-parsed]
+  (with-open [wrtr (io/writer file :append true)]
+    (.write wrtr
+            (str (common/flush-dir "left"
+                                   (str
+                                    "\\setstretch{0.5}\n"
+                                    "{\\fontsize{12pt}{12pt}\\selectfont\\textbf{Skills}}\n"
+                                    common/line-sep))
+                 (common/flush-dir "left"
+                                   (str
+                                    "\\setstretch{0.5}\n"
+                                    "\\begin{multicols}{2}\n"
+                                    "\\begin{itemize}\n"
+                                    (common/parse-list
+                                     (get-in resume-parsed [:Skills_Section :skills]))
+                                    "\\end{itemize}\n"
+                                    "\\end{multicols}\n"))))))
+(defn test-run
+  [file resume-parsed]
+  (write-header file resume-parsed)
+  (write-summary file resume-parsed)
+  (write-education file resume-parsed)
+  (write-experience-header file)
+  (write-experience file resume-parsed)
+  (if (common/skills? resume-parsed)
+    (write-skills file resume-parsed))
+  (with-open [wrtr (io/writer file :append true)]
+    (.write wrtr (str "\\end{document}"))))
