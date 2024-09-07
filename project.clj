@@ -5,7 +5,8 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.11.1"]
                  [io.github.tonsky/toml-clj "0.1.0"]
-                 [clj-latex "0.1.1"]]
+                 [clj-latex "0.1.1"]
+                 [org.clojure/tools.cli "1.1.230"]]
   :main ^:skip-aot resu-me.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

@@ -66,27 +66,26 @@
                                            "\\end{multicols}\n")))))))))
 
 (defn write-experience
-  ([file resume-parsed cnt]
-   (let [parse-exp
-         #(common/parse-experience resume-parsed % cnt)]
-     (if (>= (count (get-in resume-parsed [:Experience]))
-             cnt)
-       (do (with-open [wrtr (io/writer file :append true)]
-             (.write wrtr
-                     (str (common/flush-dir "left" (str
-                                                    "\\setstretch{0.5}\n"
-                                                    "{\\textbf{"(parse-exp :company)",} "
-                                                    (parse-exp :location)" \\hfill \n"
-                                                    "\\textbf{"(parse-exp :start)" --- "(parse-exp :end)"}}\n"
-                                                    "\\newline\n"
-                                                    "\\textit{"(parse-exp :title)"}\n"
-                                                    "\\begin{itemize}\n"
-                                                    (common/parse-list
-                                                     (parse-exp :duties))
-                                                    "\\end{itemize}\n")))))
-           (write-experience file resume-parsed (inc cnt))))))
   ([file resume-parsed]
-   (write-experience file resume-parsed 1)))
+   (loop [cnt 1]
+     (let [parse-exp
+           #(common/parse-experience resume-parsed % cnt)]
+       (if (>= (count (get-in resume-parsed [:Experience]))
+               cnt)
+         (do (with-open [wrtr (io/writer file :append true)]
+               (.write wrtr
+                       (str (common/flush-dir "left" (str
+                                                      "\\setstretch{0.5}\n"
+                                                      "{\\textbf{"(parse-exp :company)",} "
+                                                      (parse-exp :location)" \\hfill \n"
+                                                      "\\textbf{"(parse-exp :start)" --- "(parse-exp :end)"}}\n"
+                                                      "\\newline\n"
+                                                      "\\textit{"(parse-exp :title)"}\n"
+                                                      "\\begin{itemize}\n"
+                                                      (common/parse-list
+                                                       (parse-exp :duties))
+                                                      "\\end{itemize}\n")))))
+             (recur (inc cnt))))))))
 
 (defn write-experience-header
   [file]
@@ -125,3 +124,4 @@
     (write-skills file resume-parsed))
   (with-open [wrtr (io/writer file :append true)]
     (.write wrtr (str "\\end{document}"))))
+

@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [resu-me.bugstyle :as bugstyle]
             [resu-me.common :as common]
+            [resu-me.cliparse :as cli]
             [clojure.java.shell :as shell]
             [clj-latex.core :as latex])
   (:gen-class))
@@ -61,10 +62,14 @@
   [file]
   (cond (false? (.exists (io/file file))) 'nil
         :else (io/delete-file file)))
+
 (defn make-pdf
   [file]
   (println "generating pdf . . .")
-  (shell/sh "pdflatex" (str file)))
+  (shell/sh "pdflatex"
+            (str "-output-directory="
+                 (clojure.string/trim-newline (get (shell/sh "dirname" file) :out)))
+            (str file)))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -73,5 +78,8 @@
   (get-template test-file resume-parsed)
   (make-pdf test-file)
   (println "Generation complete!")
-  (println "PDF saved to" (get (shell/sh "pwd") :out))
+  (println "PDF saved to" (clojure.string/replace
+                           (cli/spit-file test-file)
+                           ".tex"
+                           ".pdf"))
   (System/exit 0))
