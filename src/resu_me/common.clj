@@ -56,3 +56,18 @@
 (defn skills?
   [resume-parsed]
   (get-in resume-parsed [:has_skill]))
+
+
+;(defn do-list
+;  ([kw sym]
+;   (do-list kw sym 0))
+;  ([kw sym cnt]
+;     (if (< cnt (count sym))
+;       (do
+;         (let [symb (nth sym cnt)]
+;           (if (list? symb)
+;             (println (cons kw (map #(if (symbol? %) 
+;                                       (list 'quote %) %) symb)))
+;             (println (list kw (list 'quote symb))))
+;           (do-list kw sym (inc cnt)))
+;         'nil))))
