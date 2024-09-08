@@ -4,6 +4,7 @@
             [resu-me.bugstyle :as bugstyle]
             [resu-me.common :as common]
             [resu-me.cliparse :as cli]
+            [clojure.string :as string]
             [clojure.java.shell :as shell]
             [clj-latex.core :as latex])
   (:gen-class))
@@ -14,8 +15,12 @@
   This will allow transformation into .md and latex later.
   Markdown to be used as an intermediary form to validate everything before converting into a pdf file"
   [file]
-  (cond (false? (.exists (io/file file))) (println "File doesn't exist!")
-        (nil? (re-find #"\.toml$" file)) (println "Please provide a .toml file.")
+  (cond (false? (.exists (io/file file))) (do
+                                            (println "File doesn't exist!")
+                                            (System/exit 0))
+        (nil? (re-find #"\.toml$" file)) (do
+                                           (println "Please provide a .toml file.")
+                                           (System/exit 0))
         :else (with-open [reader (io/reader file)]
                 (toml/read reader {:key-fn keyword}))))
 
@@ -44,8 +49,8 @@
 
 
 ;; tests
-(def resume-parsed
-                (parse-config "/home/bigbug/Documents/resu-me/resources/first.toml"))
+;(def resume-parsed
+;                (parse-config "/home/bigbug/Documents/resu-me/resources/first.toml"))
 (def test-file "/home/bigbug/Documents/resu-me/resources/test.tex")
 
 (defn get-template
@@ -68,18 +73,33 @@
   (println "generating pdf . . .")
   (shell/sh "pdflatex"
             (str "-output-directory="
-                 (clojure.string/trim-newline (get (shell/sh "dirname" file) :out)))
+                 (string/trim-newline (get (shell/sh "dirname" file) :out)))
             (str file)))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (overwrite-dupe test-file)
-  (get-template test-file resume-parsed)
-  (make-pdf test-file)
-  (println "Generation complete!")
-  (println "PDF saved to" (clojure.string/replace
-                           (cli/spit-file test-file)
-                           ".tex"
-                           ".pdf"))
-  (System/exit 0))
+  (let [{:keys [options exit-message ok?]}
+        (cli/validate-args args)
+        resume-parsed
+        (get-in options [:config])]
+    (print resume-parsed)
+    (if exit-message
+      (cli/exit (if ok? 0 1) exit-message))
+      (overwrite-dupe test-file)
+      (get-template test-file resume-parsed)
+      (if (nil? (get-in options [:no-pdf]))
+        (do (make-pdf test-file)
+            (println "Generation complete!")
+            (println "PDF saved to" (string/replace
+                                     (cli/spit-file test-file)
+                                     ".tex"
+                                     ".pdf")))
+        (println "Skipping PDF Generation"))
+      (System/exit 0)))
+
+(defn print-parse
+  [args]
+  (let [resume-parsed
+        (cli/toml-from-arg (str args))]
+    resume-parsed))
