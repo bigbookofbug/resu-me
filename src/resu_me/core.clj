@@ -82,8 +82,13 @@
   (let [{:keys [options exit-message ok?]}
         (cli/validate-args args)
         resume-parsed
-        (get-in options [:config])]
-    (print resume-parsed)
+        (if (nil? (get-in options [:config]))
+          (do
+        (println "No valid config file found!")
+        (println "Searching for resume.toml in current directory...")
+        (cli/parse-config))
+      (get-in options [:config]))]
+;    (print resume-parsed)
     (if exit-message
       (cli/exit (if ok? 0 1) exit-message))
       (overwrite-dupe test-file)

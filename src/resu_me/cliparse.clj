@@ -9,7 +9,7 @@
   "Parse the initial config file into clj.
   This will allow transformation into .md and latex later.
   Markdown to be used as an intermediary form to validate everything before converting into a pdf file"
-  [file]
+  ([file]
   (cond (false? (.exists (io/file file))) (do
                                             (println "File doesn't exist!")
                                             (System/exit 0))
@@ -18,16 +18,17 @@
                                            (System/exit 0))
         :else (with-open [reader (io/reader file)]
                 (toml/read reader {:key-fn keyword}))))
-
-(defn toml-exists?
-  [file]
-  (cond (false? (.exists (io/file file))) (do
-                                            (println "File doesn't exist!")
-                                            nil)
-        (nil? (re-find #"\.toml$" file)) (do
-                                           (println "Please provide a .toml file.")
-                                           nil)
-        :else true))
+([]
+ (let [file
+       (str (System/getenv "PWD") "/" "resume.toml")]
+   (cond (false? (.exists (io/file file))) (do
+                                             (println "File doesn't exist!")
+                                             (System/exit 0))
+         (nil? (re-find #"\.toml$" file)) (do
+                                            (println "Please provide a .toml file.")
+                                            (System/exit 0))
+         :else (with-open [reader (io/reader file)]
+                 (toml/read reader {:key-fn keyword}))))))
 
 (defn spit-file
   [file]
@@ -41,7 +42,7 @@
 (def cli-opts
   [
    ["-c" "--config CONFIG" "TOML config file for resume"
-    :default (parse-config (spit-file "resume.toml"))
+ ;   :default (parse-config)
     :default-desc "resume.toml"
     :parse-fn #(parse-config (spit-file %))]
    [nil "--no-pdf" "Generate a .tex file only."]
