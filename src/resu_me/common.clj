@@ -52,7 +52,6 @@
                 [resume-parsed exp cnt]
                 (get-in resume-parsed [:Experience (keyword (str cnt)) exp]))
 
-
 (defn skills?
   [resume-parsed]
   (get-in resume-parsed [:has_skill]))

@@ -113,15 +113,3 @@
                                      (get-in resume-parsed [:Skills_Section :skills]))
                                     "\\end{itemize}\n"
                                     "\\end{multicols}\n"))))))
-(defn test-run
-  [file resume-parsed]
-  (write-header file resume-parsed)
-  (write-summary file resume-parsed)
-  (write-education file resume-parsed)
-  (write-experience-header file)
-  (write-experience file resume-parsed)
-  (if (common/skills? resume-parsed)
-    (write-skills file resume-parsed))
-  (with-open [wrtr (io/writer file :append true)]
-    (.write wrtr (str "\\end{document}"))))
-
