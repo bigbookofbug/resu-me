@@ -18,11 +18,7 @@ area = "Entymology"
 degree = "BS"
 start = 2015
 end = 2019
-highlights = [
-"GPA: 4.0",
-"Minor in Behavioral Psychology"
-]
-
+highlights = false
 [Experience.1]
 company = "Bug enterprise, inc"
 location = "Austin, Texas"

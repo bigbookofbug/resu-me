@@ -55,15 +55,15 @@
                                     "\\newline\n"
                                     (common/parse-education resume-parsed :degree) ", "
                                     (common/parse-education resume-parsed :area)
-                                    (if (not (nil?
-                                              (common/parse-education resume-parsed :highlights)))
-                                      (do (str
+                                    (if (common/education-highlights? resume-parsed)
+                                      (str
                                            "\\begin{multicols}{2}\n"
                                            "\\begin{itemize}\n"
                                            (common/parse-list
                                             (get-in resume-parsed [:Education_Section :highlights]))
                                            "\\end{itemize}\n"
-                                           "\\end{multicols}\n")))))))))
+                                           "\\end{multicols}\n")
+                                      (println "Skipping Education Highlights ..."))))))))
 
 (defn write-experience
   ([file resume-parsed]

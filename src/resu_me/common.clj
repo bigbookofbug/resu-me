@@ -56,6 +56,10 @@
   [resume-parsed]
   (get-in resume-parsed [:has_skill]))
 
+(defn education-highlights?
+  [resume-parsed]
+  (get-in resume-parsed [:Education_Section :highlights]))
+
 
 ;(defn do-list
 ;  ([kw sym]
