@@ -10,18 +10,43 @@
             (str
              "\\pagenumbering{gobble}\n"
              "\\begin{document}\n"
-             (common/flush-dir "right"
+             (common/flush-direction "right"
                                (str "\\setstretch{0.5}\n"
                                     "{\\fontsize{12pt}{12pt}\\selectfont\n"
                                     (common/parse-list
                                      (get-in resume-parsed [:Personal :contact]))"}"))
              "\\vspace{-40pt}\n"
-             (common/flush-dir "left"
+             (common/flush-direction "left"
                                (str "\\setstretch{0.5}\n"
                                     "{\\fontsize{16pt}{16pt}\\selectfont\n"
                                     "{\\textbf{"
                                     (get-in resume-parsed [:Personal :name])"}}}\n"
                                     common/line-sep))))))
+(defn write-preabmle
+  []
+  (str
+   (common/document-class 'article ["a4paper"
+                                    "12pt"])
+   (apply str (map #(common/use-package %)
+                     (list 'setspace
+                           'times
+                           'soul)))
+   (common/use-package 'geometry ["left=2.5cm"
+                                   "top=2.5cm"
+                                   "right=2.5cm"
+                                   "bottom=2.5cm"
+                                   "bindingoffset=0.5cm"])
+   (common/use-package 'inputenc ["utf8"])
+   (common/latex-command 'renewcommand
+                         :args [(common/latex-command 'baselinestretch) 1])
+   (common/latex-command 'pagenumbering
+                         :args 'gobble)))
+
+(defn write-document
+  [resume-parsed]
+  (common/document
+;;to be continued
+   ))
 
 
 (defn write-summary
@@ -29,7 +54,7 @@
   (with-open [wrtr (io/writer file :append true)]
     (.write wrtr
             (str
-             (common/flush-dir "left"
+             (common/flush-direction "left"
                                (str "\\setstretch{0.5}\n"
                                     "{\\fontsize{12pt}{12pt}\\selectfont\n"
                                     (common/parse-summary resume-parsed)
@@ -41,12 +66,12 @@
   (with-open [wrtr (io/writer file :append true)]
     (.write wrtr
             (str
-             (common/flush-dir "left"
+             (common/flush-direction "left"
                                (str "\\setstretch{0.5}\n"
                                     "{\\fontsize{12pt}{12pt}\\selectfont\n"
                                     "\\textbf{Education}}\n"
                                     common/line-sep))
-             (common/flush-dir "left"
+             (common/flush-direction "left"
                                (str "{\\textbf{"
                                     (common/parse-education resume-parsed :institute)
                                     " \\hfill "
@@ -59,8 +84,10 @@
                                       (str
                                            "\\begin{multicols}{2}\n"
                                            "\\begin{itemize}\n"
+                                           ;;FIXME
                                            (common/parse-list
                                             (get-in resume-parsed [:Education_Section :highlights]))
+;;FIXME = no iseq from boolean
                                            "\\end{itemize}\n"
                                            "\\end{multicols}\n")
                                       (println "Skipping Education Highlights ..."))))))))
@@ -74,7 +101,7 @@
                cnt)
          (do (with-open [wrtr (io/writer file :append true)]
                (.write wrtr
-                       (str (common/flush-dir "left" (str
+                       (str (common/flush-direction "left" (str
                                                       "\\setstretch{0.5}\n"
                                                       "{\\textbf{"(parse-exp :company)",} "
                                                       (parse-exp :location)" \\hfill \n"
@@ -91,7 +118,7 @@
   [file]
   (with-open [wrtr (io/writer file :append true)]
     (.write wrtr
-                (str (common/flush-dir "left" (str
+                (str (common/flush-direction "left" (str
                                                "\\setstretch{0.5}\n"
                                                "{\\fontsize{12pt}{12pt}\\selectfont \\textbf{Work Experience}}\n"
                                                common/line-sep))))))
@@ -99,12 +126,12 @@
   [file resume-parsed]
   (with-open [wrtr (io/writer file :append true)]
     (.write wrtr
-            (str (common/flush-dir "left"
+            (str (common/flush-direction "left"
                                    (str
                                     "\\setstretch{0.5}\n"
                                     "{\\fontsize{12pt}{12pt}\\selectfont\\textbf{Skills}}\n"
                                     common/line-sep))
-                 (common/flush-dir "left"
+                 (common/flush-direction "left"
                                    (str
                                     "\\setstretch{0.5}\n"
                                     "\\begin{multicols}{2}\n"

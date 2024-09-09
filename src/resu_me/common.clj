@@ -21,12 +21,12 @@
 \\renewcommand{\\baselinestretch}{1}
 "))))
 
-(defn flush-dir
-  "single function that allows for flushing left or write in LaTex - with the 'body' arg being the contents within the flush"
-  [direction body]
-    (str "\\begin{flush" direction "}\n"
-         body
-         "\\end{flush" direction "}\n"))
+;(defn flush-dir
+;  "single function that allows for flushing left or write in LaTex - with the 'body' arg being the contents within the flush"
+;  [direction body]
+;    (str "\\begin{flush" direction "}\n"
+;         body
+;         "\\end{flush" direction "}\n"))
 
 
 (def line-sep "\\noindent\\rule{\\textwidth}{0.4pt}\n")
@@ -65,11 +65,23 @@
                         (str "[" (string/join ", " opts) "]"))
                       (if (nil? args)
                         ""
-                        (str "{" args "}"))
+                        (if (sequential? args)
+                          (apply str (map #(str "{"%"}") args))
+                          (str "{"args"}")))
                       (if (nil? body)
                         ""
                         (str " " body))
                       "\n"))
+(defn use-package
+  [package & opts]
+  (latex-command "usepackage"
+                 :args package
+                 :opts (first opts)))
+(defn document-class
+  [class & opts]
+  (latex-command "documentclass"
+                 :args class
+                 :opts (first opts)))
 
 (defn render-item
                 ([body]
@@ -77,9 +89,11 @@
                                        :body body))
                 ([body opts]
                  (latex-command "item"
-                                       :body body
-                                       :opts opts)))
-;;logic here can be used to parse experiences - though the list will start at 1
+                                :body body
+                                :opts opts)))
+
+;;bandage until i can figure out how to properly recur on nested maps
+;;so that i can pass args such as (parse list '("test 1" (list "test 2" ["arg"]) "3"))
 (defn parse-list
   "internal fucntion, to turn an item into a list. call to it may look something like:
   (parse-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
@@ -87,6 +101,33 @@
   (apply str
          (map #(render-item %) lst)))
 
+(defn latex-begin
+  [command & body]
+  (str (latex-command "begin" :args command)
+       (apply str body)
+       (latex-command "end" :args command)))
+
+(defn flush-direction
+  "single function that allows for flushing left or write in LaTex - with the 'body' arg being the contents within the flush"
+  [direction & body]
+  (latex-begin (str "flush" direction)
+               (apply str body)))
+
+(defn document
+  [& body]
+  (latex-begin "document" (apply str body)))
+;                (str (latex-command "begin" :args "document")
+;                (apply str body)
+;                (latex-command "end" :args "document")))
+
+
+;(defn deep-list [f lst]
+;                (cond (empty? lst) nil
+;                      (sequential? (first lst))
+;                      (cons (deep-list f (first lst))
+;                            (deep-list f (rest lst)))
+;                      :else (cons (f (first lst))
+;                                  (deep-list f (rest lst)))))
 
 ;(defn do-list
 ;  ([kw sym]

@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [clojure.tools.cli :refer [parse-opts]]))
 
-(defn parse-config 
+(defn parse-config
   "If it exists, parse the initial config file into clj map.
   This will allow transformation into .toml and latex later.
   If no file is provided, searches for a \"resume.toml\" in the pwd"

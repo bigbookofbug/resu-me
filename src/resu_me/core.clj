@@ -4,8 +4,7 @@
             [resu-me.common :as common]
             [resu-me.cliparse :as cli]
             [clojure.string :as string]
-            [clojure.java.shell :as shell]
-            [clj-latex.core :as latex])
+            [clojure.java.shell :as shell])
   (:gen-class))
 
 (defn write-bugstyle
