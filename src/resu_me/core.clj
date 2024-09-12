@@ -10,22 +10,23 @@
 (defn write-bugstyle
   [file resume-parsed]
   (println "using template \"bugstyle\"...")
-  (bugstyle/write-header file resume-parsed)
-  (Thread/sleep 500)
-  (bugstyle/write-summary file resume-parsed)
-  (bugstyle/write-education file resume-parsed)
-  (bugstyle/write-experience-header file)
-  (bugstyle/write-experience file resume-parsed)
-  (println "checking for skills...")
-  (Thread/sleep 500)
-  (if (common/skills? resume-parsed)
-    (do
-      (println "skills found, writing.")
-      (bugstyle/write-skills file resume-parsed))
-    (println "no skill detected"))
   (with-open [wrtr (io/writer file :append true)]
-    (.write wrtr (str "\\end{document}")))
-  (println "complete! file saved to" file))
+    (.write wrtr (str
+                  (bugstyle/write-preabmle)
+                  (common/document
+                  (bugstyle/write-header resume-parsed)
+                  (Thread/sleep 500)
+                  (bugstyle/write-summary resume-parsed)
+                  (bugstyle/write-education resume-parsed)
+                  (bugstyle/write-experience resume-parsed)
+                  (println "checking for skills...")
+                  (Thread/sleep 500)
+                  (if (common/skills? resume-parsed)
+                    (do
+                      (println "skills found, writing.")
+                      (bugstyle/write-skills resume-parsed))
+                    (println "no skill detected"))))))
+                  (println "complete! file saved to" file))
 
 ;; Maybe take a look at the templates in this repo for inspiration
 ;; https://github.com/subidit/rover-resume

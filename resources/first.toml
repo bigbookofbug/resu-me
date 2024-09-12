@@ -2,10 +2,10 @@ template = "bugstyle"
 has_skill = true
 
 [Personal]
-name = "Big Bug"
+name = "Bug Bugson"
 contact = [
 "555-555-5555",
-"bigbookofbug@proton.me",
+"ema@ail.com",
 "mywebsite.site"
 ]
 
@@ -18,12 +18,15 @@ area = "Entymology"
 degree = "BS"
 start = 2015
 end = 2019
-highlights = ["AHHHHHHH",
-"ADFSAFASF",
-"AFDAFASFAF"]
+highlights = [
+"This is a collection of highlights",
+"it is a list",
+"and it is here"
+]
+
 [Experience.1]
 company = "Bug enterprise, inc"
-location = "Austin, Texas"
+location = "New York, New York"
 title = "Engineer Team Lead"
 start = "August 2021"
 end = "Present"
