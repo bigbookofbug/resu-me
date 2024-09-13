@@ -3,5 +3,6 @@
 *.dvi
 *.log
 *.pdf
+*.tex
 target/
 !.gitignore

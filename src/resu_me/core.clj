@@ -1,6 +1,7 @@
 (ns resu-me.core
   (:require [clojure.java.io :as io]
             [resu-me.bugstyle :as bugstyle]
+            [resu-me.star-rover :as star-rover]
             [resu-me.common :as common]
             [resu-me.cliparse :as cli]
             [clojure.string :as string]
@@ -14,19 +15,40 @@
     (.write wrtr (str
                   (bugstyle/write-preabmle)
                   (common/document
-                  (bugstyle/write-header resume-parsed)
-                  (Thread/sleep 500)
-                  (bugstyle/write-summary resume-parsed)
-                  (bugstyle/write-education resume-parsed)
-                  (bugstyle/write-experience resume-parsed)
-                  (println "checking for skills...")
-                  (Thread/sleep 500)
-                  (if (common/skills? resume-parsed)
-                    (do
-                      (println "skills found, writing.")
-                      (bugstyle/write-skills resume-parsed))
-                    (println "no skill detected"))))))
-                  (println "complete! file saved to" file))
+                   (bugstyle/write-header resume-parsed)
+                   (Thread/sleep 500)
+                   (bugstyle/write-summary resume-parsed)
+                   (bugstyle/write-education resume-parsed)
+                   (bugstyle/write-experience resume-parsed)
+                   (println "checking for skills...")
+                   (Thread/sleep 500)
+                   (if (common/skills? resume-parsed)
+                     (do
+                       (println "skills found, writing.")
+                       (bugstyle/write-skills resume-parsed))
+                     (println "no skill detected"))))))
+  (println "complete! file saved to" file))
+
+(defn write-star-rover
+  [file resume-parsed]
+  (println "using template \"Star Rover\"...")
+  (with-open [wrtr (io/writer file :append true)]
+    (.write wrtr (str
+                  (star-rover/write-preamble resume-parsed)
+                  (common/document
+                   (star-rover/write-banner resume-parsed)
+                   (Thread/sleep 500)
+                   (star-rover/write-summary resume-parsed)
+                   (star-rover/write-education resume-parsed)
+                   (star-rover/write-experience resume-parsed)
+                   (println "checking for skills...")
+                   (Thread/sleep 500)
+                   (if (common/skills? resume-parsed)
+                     (do
+                       (println "skills found, writing.")
+                       (star-rover/write-skills resume-parsed))
+                     (println "no skill detected"))))))
+  (println "complete! file saved to" file))
 
 ;; Maybe take a look at the templates in this repo for inspiration
 ;; https://github.com/subidit/rover-resume
@@ -36,7 +58,14 @@
   [file resume-parsed]
   (let [template (get-in resume-parsed [:template])]
     (cond
-      (= template "bugstyle") (write-bugstyle file resume-parsed))))
+      (= (string/lower-case template)
+         "bugstyle")
+      (write-bugstyle file resume-parsed)
+      (= (string/lower-case template)
+         "star rover")
+      (write-star-rover file resume-parsed))))
+
+
 
 (defn overwrite-dupe
   "Parse the initial config file into clj.

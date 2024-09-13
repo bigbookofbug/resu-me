@@ -1,6 +1,5 @@
 (ns resu-me.common
-  (:require [toml-clj.core :as toml]
-            [clojure.string :as string]
+  (:require [clojure.string :as string]
             [clojure.java.io :as io]))
 
 
@@ -45,6 +44,23 @@
                         ""
                         (str " " body))
                       "\n"))
+
+;; TODO
+(defn new-command
+  [command definition
+   &{:keys [number-args default-arg starred?]
+     :or {number-args 0 default-arg nil starred? nil}}]
+  (str "\\newcommand"
+       (if (nil? starred?)
+         nil
+         "*")
+       "{"(latex-command command)"}"
+       "["number-args"]"
+       (if (nil? default-arg)
+         nil
+         (str "["(string/join ", " default-arg)"]"))
+       "{"definition"}"))
+
 (defn use-package
   [package & opts]
   (latex-command "usepackage"
@@ -67,21 +83,28 @@
 
 ;;bandage until i can figure out how to properly recur on nested maps
 ;;so that i can pass args such as (parse list '("test 1" (list "test 2" ["arg"]) "3"))
-(defn parse-list
-  "internal fucntion, to turn an item into a list. call to it may look something like:
-  (parse-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
+(defn item-list
+  "internal fucntion, to turn coll into a list of `\\item`. call to it may look something like:
+  (list-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
   [lst]
   (apply str
          (map #(render-item %) lst)))
 
+(defn quad-list
+  "internal fucntion, to turn a coll into a list of `\\quad`. call to it may look something like:
+  (parse-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
+  [lst]
+  (apply str
+         (map #(str % " " (latex-command 'quad)) lst)))
+
 (defn latex-begin
-  "Takes a string, symbol, or collection as its first argument, and a body as its second argument.\n
+  "Return: `string`. Start and end a LaTeX environment, with `command` being the environment, and `body` being the content of the environment. \n
+  Example-input:\n
+  `(latex-begin 'center \"hello\")\n`
   Output:\n
-  `\\begin{ARG}\n`
-  `\tBODY\n`
-  `\\end{ARG}`\n
-  Example:\n
-  `(latex-begin 'itemize \"hello\")`"
+  `\\begin{center}\n`
+  `\thello\n`
+  `\\end{center}`\n"
   [command & body]
   (str (latex-command 'begin :args command)
        (apply str body)

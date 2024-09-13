@@ -37,7 +37,7 @@
                   'fontsize
                   :args ["12pt" "12pt"])
                  (common/latex-command 'selectfont)
-                 (common/parse-list
+                 (common/item-list
                   (get-in resume-parsed [:Personal :contact])))]))
    (common/latex-command
     'vspace
@@ -102,7 +102,7 @@
        (common/latex-begin
         ['multicols 2]
         (common/latex-begin '[itemize]
-                            (common/parse-list
+                            (common/item-list
                              (get-in resume-parsed
                                      [:Education_Section :highlights])))))
       (println "Skipping education highlights ...")))))
@@ -147,7 +147,7 @@
                           'textit
                           :args (parse-exp :title))
                          (common/latex-begin 'itemize
-                                             (common/parse-list
+                                             (common/item-list
                                               (parse-exp :duties)))))]
                     (recur (inc cnt) (str res new-res)))
                     res))))))
@@ -172,26 +172,6 @@
     (common/latex-begin
      ['multicols 2]
      (common/latex-begin '[itemize]
-                         (common/parse-list
+                         (common/item-list
                           (get-in resume-parsed
                                   [:Skills_Section :skills])))))))
-
-
-(defn write-skill
-  [file resume-parsed]
-  (with-open [wrtr (io/writer file :append true)]
-    (.write wrtr
-            (str (common/flush-direction "left"
-                                   (str
-                                    "\\setstretch{0.5}\n"
-                                    "{\\fontsize{12pt}{12pt}\\selectfont\\textbf{Skills}}\n"
-                                    line-sep))
-                 (common/flush-direction "left"
-                                   (str
-                                    "\\setstretch{0.5}\n"
-                                    "\\begin{multicols}{2}\n"
-                                    "\\begin{itemize}\n"
-                                    (common/parse-list
-                                     (get-in resume-parsed [:Skills_Section :skills]))
-                                    "\\end{itemize}\n"
-                                    "\\end{multicols}\n"))))))
