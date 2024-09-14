@@ -247,17 +247,3 @@
   (str
    (common/parse-summary resume-parsed)
    (common/latex-command 'newline)))
-
-
-
-
-;(defn write-test
-;  [resume-parsed]
-;  (str
-;   (write-preamble resume-parsed)
-;   (common/document
-;    (write-banner resume-parsed)
-;    (write-summary resume-parsed)
-;    (write-education resume-parsed)
-;    (write-experience resume-parsed)
-;    (write-skills resume-parsed))))

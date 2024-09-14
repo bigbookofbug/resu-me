@@ -61,17 +61,11 @@ list = [
 "Bit so many times that I developed an immunity to various neurotoxins"
 ]
 
-[Skills]
-style = "multicol"
-list = [
-"Proficient in GNU/Linux operating system installation and maintenance.",
-"Understanding and enjoyment of the C and Clojure programming languages.",
-"Experience with catching and releasing spiders instead of squishing them.",
-"Proficient working both alone and in a team-oriented environment."
-]
-
-
-
-### GET KEYS WITH
-#(keys (with-open [reader (io/reader file)]
-#                   (toml/read reader {:key-fn keyword})))
+#[Skills]
+#style = "multicol"
+#list = [
+#"Proficient in GNU/Linux operating system installation and maintenance.",
+#"Understanding and enjoyment of the C and Clojure programming languages.",
+#"Experience with catching and releasing spiders instead of squishing them.",
+#"Proficient working both alone and in a team-oriented environment."
+#]

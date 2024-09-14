@@ -2,21 +2,34 @@
   (:require [clojure.string :as string]
             [clojure.java.io :as io]))
 
+(defn stringify-key
+  [k]
+  (string/replace
+   (str k) ":" ""))
 
-(defn parse-summary
-  [resume-parsed]
+(defn parse-seq
+  "internal fucntion, to turn coll into a list of `\\item`. call to it may look something like:
+  (list-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
+  [lst cmd]
+  (apply str
+         (map #(cmd %) lst)))
+
+(defn parse-section
+  [resume-parsed section subsection]
   (str
-   (get-in resume-parsed
-           [:Summary_Section :summary])))
+   (if (coll? (get-in resume-parsed [section subsection]))
+     (if (= 1 (count (get-in resume-parsed
+                             [section subsection])))
+       (first (get-in resume-parsed
+                      [section subsection]))
+       (apply str (get-in resume-parsed
+               [section subsection])))
+     (get-in resume-parsed
+             [section subsection]))))
 
-(defn parse-education
-  [resume-parsed section]
-  (str
-   (get-in resume-parsed [:Education_Section section])))
-
-(defn parse-experience
-                [resume-parsed exp cnt]
-                (get-in resume-parsed [:Experience (keyword (str cnt)) exp]))
+(defn parse-experience-nested
+  [resume-parsed section subsection cnt]
+  (get-in resume-parsed [section (keyword (str cnt)) subsection]))
 
 (defn skills?
   [resume-parsed]
@@ -121,3 +134,21 @@
 (defn document
   [& body]
   (latex-begin 'document (apply str body)))
+
+(defn key-depth
+  ([m]
+   (key-depth m 0))
+  ([m depth]
+   (reduce
+     (fn [acc [k v]]
+       (if (map? v)
+         (assoc acc k (key-depth v (inc depth)))
+         (assoc acc k depth)))
+     {} m)))
+
+(defn is-nested?
+  [resume-parsed k]
+  (every? true?
+          (map #(map? %)
+               (vals (key-depth
+                      (get-in resume-parsed [k]))))))

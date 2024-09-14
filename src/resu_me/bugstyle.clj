@@ -1,10 +1,11 @@
 (ns resu-me.bugstyle
   (:require [clojure.java.io :as io]
+            [clojure.string :as string]
             [resu-me.common :as common]))
 
 (def line-sep "\\noindent\\rule{\\textwidth}{0.4pt}\n")
 
-(defn write-preabmle
+(defn write-preamble
   []
   (str
    (common/document-class 'article ["a4paper"
@@ -25,8 +26,35 @@
    (common/latex-command 'pagenumbering
                          :args 'gobble)))
 
-(defn write-header
-  [resume-parsed]
+;;;;;;;;;;
+;;;NEW;;;;
+;;;;;;;;;;
+(defn write-multicol
+  [resume-parsed section]
+  (str
+   (common/flush-direction
+    'left
+    (common/latex-command
+     'setstretch
+     :args [0.5
+            (str (common/latex-command
+                  'fontsize
+                  :args ["12pt" "12pt"])
+                 (common/latex-command 'selectfont)
+                 (common/latex-command 'textbf
+                                       :args (common/stringify-key section)))])
+    line-sep)
+   (common/flush-direction
+    'left
+    (common/latex-begin
+     ['multicols 2]
+     (common/latex-begin '[itemize]
+                         (common/item-list
+                          (get-in resume-parsed
+                                  [section :list])))))))
+
+(defn write-banner
+  [resume-parsed section]
   (str
    (common/flush-direction
     'right
@@ -38,7 +66,7 @@
                   :args ["12pt" "12pt"])
                  (common/latex-command 'selectfont)
                  (common/item-list
-                  (get-in resume-parsed [:Personal :contact])))]))
+                  (get-in resume-parsed [section :list])))]))
    (common/latex-command
     'vspace
     :args "-40pt")
@@ -52,11 +80,11 @@
                  (common/latex-command 'selectfont)
                  (common/latex-command
                   'textbf
-                  :args (get-in resume-parsed [:Personal :name])))])
+                  :args (get-in resume-parsed [section :title])))])
     line-sep)))
 
 (defn write-summary
-  [resume-parsed]
+  [resume-parsed section]
   (str
    (common/flush-direction
     'left
@@ -67,93 +95,11 @@
                   'fontsize
                   :args ["12pt" "12pt"])
                  (common/latex-command 'selectfont)
-                 (common/parse-summary resume-parsed))])
+                 (common/parse-section resume-parsed section :list))])
     (common/latex-command 'newline))))
 
-(defn write-education
-  [resume-parsed]
-  (str
-   (common/flush-direction
-    'left
-    (common/latex-command
-     'setstretch
-     :args [0.5
-            (str (common/latex-command
-                  'fontsize
-                  :args ["12pt" "12pt"])
-                 (common/latex-command 'selectfont)
-                 (common/latex-command 'textbf
-                                       :args 'Education))])
-    line-sep)
-   (common/flush-direction
-    'left
-    (common/latex-command
-     'textbf
-     :args (str
-            (common/parse-education resume-parsed :institute)
-            (common/latex-command 'hfill)
-            (common/parse-education resume-parsed :end)))
-    (common/latex-command 'newline)
-    (apply str (interpose ", "
-                          (list (common/parse-education resume-parsed :degree)
-                                (common/parse-education resume-parsed :area))))
-    (if (common/education-highlights? resume-parsed)
-      (str
-       (common/latex-begin
-        ['multicols 2]
-        (common/latex-begin '[itemize]
-                            (common/item-list
-                             (get-in resume-parsed
-                                     [:Education_Section :highlights])))))
-      (println "Skipping education highlights ...")))))
-
 (defn write-experience
-  [resume-parsed]
-  (str (common/flush-direction 'left
-       (common/latex-command
-        'setstretch
-        :args [0.5
-               (str (common/latex-command
-                     'fontsize
-                     :args ["12pt" "12pt"])
-                    (common/latex-command 'selectfont)
-                    (common/latex-command 'textbf
-                                          :args "Work Experience"))]))
-       line-sep
-       (str (loop [cnt 1
-                   res nil]
-              (let [parse-exp
-                    #(common/parse-experience resume-parsed % cnt)]
-                (if (>= (count (get-in resume-parsed [:Experience]))
-                        cnt)
-                    (let [new-res
-                          (str
-                           (common/flush-direction 'left
-                         (common/latex-command
-                          'setstretch
-                          :args [0.5
-                                 (str (common/latex-command
-                                       'textbf
-                                       :args (str (parse-exp :company) ","))
-                                      (parse-exp :location)
-                                      (common/latex-command 'hfill)
-                                      (common/latex-command
-                                       'textbf
-                                       :args (str (parse-exp :start)
-                                                  " --- "
-                                                  (parse-exp :end))))])
-                         (common/latex-command 'newline)
-                         (common/latex-command
-                          'textit
-                          :args (parse-exp :title))
-                         (common/latex-begin 'itemize
-                                             (common/item-list
-                                              (parse-exp :duties)))))]
-                    (recur (inc cnt) (str res new-res)))
-                    res))))))
-
-(defn write-skills
-  [resume-parsed]
+  [resume-parsed section]
   (str
    (common/flush-direction
     'left
@@ -165,13 +111,144 @@
                   :args ["12pt" "12pt"])
                  (common/latex-command 'selectfont)
                  (common/latex-command 'textbf
-                                       :args 'Skills))])
+                                       :args (common/stringify-key section)))])
     line-sep)
    (common/flush-direction
     'left
-    (common/latex-begin
-     ['multicols 2]
-     (common/latex-begin '[itemize]
-                         (common/item-list
-                          (get-in resume-parsed
-                                  [:Skills_Section :skills])))))))
+    (common/latex-command
+     'setstretch
+     :args [0.5
+            (str (common/latex-command
+                  'textbf
+                  :args (str (common/parse-section
+                              resume-parsed
+                              section :company) (if (empty?
+                                                     (common/parse-section
+                                                      resume-parsed
+                                                      section :location))
+                                                  nil
+                                                  (str ", "
+                                                       (common/parse-section
+                                                        resume-parsed
+                                                        section :location)))
+                             (common/latex-command 'hfill)
+                             (common/latex-command
+                              'textbf
+                              :args (str
+                                     (if (not (empty? (common/parse-section
+                                                       resume-parsed section
+                                                       :start)))
+                                       (str
+                                        (common/parse-section
+                                         resume-parsed section
+                                         :start)
+                                         " --- "))
+                                         (common/parse-section resume-parsed
+                                                               section :end))))))])
+    (common/latex-command 'newline)
+    (common/latex-command
+     'textit
+     :args (common/parse-section resume-parsed
+                                 section :title))
+    (common/latex-begin 'itemize
+                        (common/item-list
+                         (get-in resume-parsed
+                                 [section :list]))))))
+
+(defn write-experience-nested
+  [resume-parsed section]
+(str
+(common/flush-direction
+    'left
+    (common/latex-command
+     'setstretch
+     :args [0.5
+            (str (common/latex-command
+                  'fontsize
+                  :args ["12pt" "12pt"])
+                 (common/latex-command 'selectfont)
+                 (common/latex-command 'textbf
+                                       :args (common/stringify-key section)))])
+    line-sep)
+(str (loop [cnt 1
+           res nil]
+     (let [parse-exp
+           #(common/parse-experience-nested resume-parsed section % cnt)]
+       (if (>= (count (get-in resume-parsed [section]))
+               cnt)
+         (let [new-res
+               (common/flush-direction
+                'left
+                (common/latex-command
+                 'setstretch
+                 :args [0.5
+                        (str (common/latex-command
+                              'textbf
+                              :args (str (parse-exp :company)))
+                                         (if (empty?
+                                              (parse-exp :location))
+                                           nil
+                                           (str (parse-exp :location)))
+                             (common/latex-command 'hfill)
+                             (common/latex-command
+                              'textbf
+                              :args (str
+                                     (if (not (empty? (parse-exp :start)))
+                                       (str (parse-exp :start)
+                                         " --- "))
+                                         (parse-exp :end))))])
+    (common/latex-command 'newline)
+    (common/latex-command
+     'textit
+     :args (parse-exp :title))
+    (common/latex-begin 'itemize
+                        (common/item-list
+                         (get-in resume-parsed
+                                 [section (keyword (str cnt)) :list]))))]
+           (recur (inc cnt) (str res new-res)))
+         res))))))
+
+(defn parse-to-bugstyle
+  [resume-parsed]
+  (println "PREAMBLE\n" (write-preamble))
+  (loop [cnt 0
+         res nil]
+      (if (>=
+           (- (count (keys resume-parsed)) 1)
+           cnt)
+        (let [fld (nth (keys resume-parsed) cnt)
+              strfld (common/stringify-key fld)]
+          (let [style (if (common/is-nested? resume-parsed fld)
+                        (string/lower-case (str (get-in resume-parsed
+                                                        [fld :1 :style])))
+                        (string/lower-case (str
+                                            (get-in resume-parsed [fld :style]))))]
+            (cond
+              (= style "banner")
+              (do
+                (println "BANNER FOUND IN" (string/upper-case strfld))
+                (println (write-banner resume-parsed fld))
+                (recur (inc cnt) (str res (write-banner resume-parsed fld))))
+              (= style "multicol")
+              (do
+                (println "MULTICOL FOUND IN" (string/upper-case strfld))
+                (println (write-multicol resume-parsed fld))
+                (recur (inc cnt) (str res (write-multicol resume-parsed fld))))
+              (= style "summary")
+            (do
+              (println "SUMMARY FOUND IN" (string/upper-case strfld))
+              (println (write-summary resume-parsed fld))
+              (recur (inc cnt) (str res (write-summary resume-parsed fld))))
+            (= style "experience")
+            (do
+              (println "EXPERIENCE FOUND IN" (string/upper-case strfld))
+              (println (if (common/is-nested? resume-parsed fld)
+                         (write-experience-nested resume-parsed fld)
+                         (write-experience resume-parsed fld)))
+              (recur (inc cnt) (str res (if (common/is-nested? resume-parsed fld)
+                                          (write-experience-nested resume-parsed fld)
+                                          (write-experience resume-parsed fld)))))
+            :else (do
+                    (println "banner not found in" strfld)
+                    (recur (inc cnt) res)))))
+        res)))
