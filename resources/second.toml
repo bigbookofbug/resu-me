@@ -1,12 +1,24 @@
 #STYLES:
 # Meta
 # Banner
-# Experience, Summary
-# List, Multicol
+# Experience
+# Summary
+# List
+
+#FIELDS
+# template -- SPECIAL
+# style
+# company -- switch to name ???
+# location
+# title
+# start
+# end
+# list
 
 [Template]
 style = "Meta"
 template = "bugstyle"
+title = "Bug Bugson"
 
 [Personal]
 style = "banner"
@@ -61,11 +73,23 @@ list = [
 "Bit so many times that I developed an immunity to various neurotoxins"
 ]
 
-#[Skills]
-#style = "multicol"
-#list = [
-#"Proficient in GNU/Linux operating system installation and maintenance.",
-#"Understanding and enjoyment of the C and Clojure programming languages.",
-#"Experience with catching and releasing spiders instead of squishing them.",
-#"Proficient working both alone and in a team-oriented environment."
-#]
+[Projects]
+style = "list"
+company = "Resu-Me Resume Parser"
+location = "Lead Developer"
+title = "https://gitlab.com/bigbookofbug/resu-me"
+end = 2023
+list = [
+"\\textbf{Resu-Me Resume Parser} lead developer \\hfill 2024"
+]
+
+[Skills]
+style = "list"
+list = [
+"Proficient in GNU/Linux operating system installation and maintenance.",
+"Understanding and enjoyment of the C and Clojure programming languages.",
+"Experience with catching and releasing spiders instead of squishing them.",
+"Proficient working both alone and in a team-oriented environment."
+]
+
+

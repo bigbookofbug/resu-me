@@ -1,7 +1,7 @@
 (ns resu-me.core
   (:require [clojure.java.io :as io]
             [resu-me.bugstyle :as bugstyle]
-;            [resu-me.star-rover :as star-rover]
+            [resu-me.star-rover :as star-rover]
             [resu-me.common :as common]
             [resu-me.cliparse :as cli]
             [clojure.string :as string]
@@ -30,26 +30,32 @@
  ;                    (println "no skill detected"))))))
   (println "complete! file saved to" file))
 
-;(defn write-star-rover
-;  [file resume-parsed]
-;  (println "using template \"Star Rover\"...")
-;  (with-open [wrtr (io/writer file :append true)]
-;    (.write wrtr (str
-;                  (star-rover/write-preamble resume-parsed)
-;                  (common/document
-;                   (star-rover/write-banner resume-parsed)
-;                   (Thread/sleep 500)
-;                   (star-rover/write-summary resume-parsed)
-;                   (star-rover/write-education resume-parsed)
-;                   (star-rover/write-experience resume-parsed)
-;                   (println "checking for skills...")
-;                   (Thread/sleep 500)
-;                   (if (common/skills? resume-parsed)
-;                     (do
-;                       (println "skills found, writing.")
-;                       (star-rover/write-skills resume-parsed))
-;                     (println "no skill detected"))))))
-;  (println "complete! file saved to" file))
+(defn write-star-rover
+  [file resume-parsed]
+  (println "using template \"Star Rover\"...")
+  (with-open [wrtr (io/writer file :append true)]
+    (.write wrtr (str
+                  (loop [cnt 0
+                         res nil]
+                    (if (>=
+                         (- (count (keys resume-parsed)) 1)
+                         cnt)
+                      (let [fld (nth (keys resume-parsed) cnt)]
+                        (let [style (string/lower-case
+                                     (str
+                                      (get-in resume-parsed [fld :style])))]
+                          (if (= style "meta")
+                            (do (println "PREAMBLE\n"
+                                         (star-rover/write-preamble resume-parsed
+                                                                    fld))
+                                (recur (inc cnt) (str res (star-rover/write-preamble
+                                                          resume-parsed
+                                                          fld))))
+                            (recur (inc cnt) res))))
+                      res))
+                  (common/document
+                   (star-rover/parse-to-star-rover resume-parsed)))))
+  (println "complete! file saved to" file))
 
 ;; Maybe take a look at the templates in this repo for inspiration
 ;; https://github.com/subidit/rover-resume
@@ -62,10 +68,9 @@
       (= (string/lower-case template)
          "bugstyle")
       (write-bugstyle file resume-parsed)
-      )))
-;      (= (string/lower-case template)
-;         "star rover")
-;      (write-star-rover file resume-parsed))))
+      (= (string/lower-case template)
+         "star rover")
+      (write-star-rover file resume-parsed))))
 
 
 

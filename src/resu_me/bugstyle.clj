@@ -3,6 +3,14 @@
             [clojure.string :as string]
             [resu-me.common :as common]))
 
+;; TODO
+;; Set it up so that headers are their own function
+;; (similar to how write-experience-header is)
+
+;; TODO
+;; separate out list into switch for sections
+;; that allows for multicol support on all sections (high-level maybe)
+
 (def line-sep "\\noindent\\rule{\\textwidth}{0.4pt}\n")
 
 (defn write-preamble
@@ -26,9 +34,6 @@
    (common/latex-command 'pagenumbering
                          :args 'gobble)))
 
-;;;;;;;;;;
-;;;NEW;;;;
-;;;;;;;;;;
 (defn write-multicol
   [resume-parsed section]
   (str
@@ -52,6 +57,27 @@
                          (common/item-list
                           (get-in resume-parsed
                                   [section :list])))))))
+(defn write-list
+  [resume-parsed section]
+  (str
+   (common/flush-direction
+    'left
+    (common/latex-command
+     'setstretch
+     :args [0.5
+            (str (common/latex-command
+                  'fontsize
+                  :args ["12pt" "12pt"])
+                 (common/latex-command 'selectfont)
+                 (common/latex-command 'textbf
+                                       :args (common/stringify-key section)))])
+    line-sep)
+   (common/flush-direction
+    'left
+     (common/latex-begin '[itemize]
+                         (common/item-list
+                          (get-in resume-parsed
+                                  [section :list]))))))
 
 (defn write-banner
   [resume-parsed section]
@@ -98,8 +124,8 @@
                  (common/parse-section resume-parsed section :list))])
     (common/latex-command 'newline))))
 
-(defn write-experience
-  [resume-parsed section]
+(defn write-experience-header
+  [section]
   (str
    (common/flush-direction
     'left
@@ -112,7 +138,12 @@
                  (common/latex-command 'selectfont)
                  (common/latex-command 'textbf
                                        :args (common/stringify-key section)))])
-    line-sep)
+    line-sep)))
+
+(defn write-experience
+  [resume-parsed section]
+  (str
+   (write-experience-header section)
    (common/flush-direction
     'left
     (common/latex-command
@@ -150,63 +181,57 @@
      'textit
      :args (common/parse-section resume-parsed
                                  section :title))
-    (common/latex-begin 'itemize
-                        (common/item-list
-                         (get-in resume-parsed
-                                 [section :list]))))))
+    (if (not (empty? (common/parse-section resume-parsed section :list)))
+      (common/latex-begin 'itemize
+                          (common/item-list
+                           (get-in
+                            resume-parsed [section
+                            :list])))
+      nil))))
 
 (defn write-experience-nested
   [resume-parsed section]
 (str
-(common/flush-direction
-    'left
-    (common/latex-command
-     'setstretch
-     :args [0.5
-            (str (common/latex-command
-                  'fontsize
-                  :args ["12pt" "12pt"])
-                 (common/latex-command 'selectfont)
-                 (common/latex-command 'textbf
-                                       :args (common/stringify-key section)))])
-    line-sep)
-(str (loop [cnt 1
-           res nil]
-     (let [parse-exp
-           #(common/parse-experience-nested resume-parsed section % cnt)]
-       (if (>= (count (get-in resume-parsed [section]))
-               cnt)
-         (let [new-res
-               (common/flush-direction
-                'left
-                (common/latex-command
-                 'setstretch
-                 :args [0.5
-                        (str (common/latex-command
-                              'textbf
-                              :args (str (parse-exp :company)))
-                                         (if (empty?
-                                              (parse-exp :location))
-                                           nil
-                                           (str (parse-exp :location)))
-                             (common/latex-command 'hfill)
-                             (common/latex-command
-                              'textbf
-                              :args (str
-                                     (if (not (empty? (parse-exp :start)))
-                                       (str (parse-exp :start)
-                                         " --- "))
-                                         (parse-exp :end))))])
-    (common/latex-command 'newline)
-    (common/latex-command
-     'textit
-     :args (parse-exp :title))
-    (common/latex-begin 'itemize
-                        (common/item-list
-                         (get-in resume-parsed
-                                 [section (keyword (str cnt)) :list]))))]
-           (recur (inc cnt) (str res new-res)))
-         res))))))
+   (write-experience-header section)
+   (str (loop [cnt 1
+               res nil]
+          (let [parse-exp
+                #(common/parse-experience-nested resume-parsed section % cnt)]
+            (if (>= (count (get-in resume-parsed [section]))
+                    cnt)
+              (let [new-res
+                    (common/flush-direction
+                     'left
+                     (common/latex-command
+                      'setstretch
+                      :args [0.5
+                             (str (common/latex-command
+                                   'textbf
+                                   :args (str (parse-exp :company)))
+                                  (if (empty?
+                                       (parse-exp :location))
+                                    nil
+                                    (str (parse-exp :location)))
+                                  (common/latex-command 'hfill)
+                                  (common/latex-command
+                                   'textbf
+                                   :args (str
+                                          (if (not (empty? (parse-exp :start)))
+                                            (str (parse-exp :start)
+                                                 " --- "))
+                                          (parse-exp :end))))])
+                     (common/latex-command 'newline)
+                     (common/latex-command
+                      'textit
+                      :args (parse-exp :title))
+                     (if (not (empty? (parse-exp :list)))
+                         (common/latex-begin 'itemize
+                                         (common/item-list
+                                          (parse-exp :list)
+                                          ))
+                         nil))]
+                (recur (inc cnt) (str res new-res)))
+              res))))))
 
 (defn parse-to-bugstyle
   [resume-parsed]
@@ -234,6 +259,11 @@
                 (println "MULTICOL FOUND IN" (string/upper-case strfld))
                 (println (write-multicol resume-parsed fld))
                 (recur (inc cnt) (str res (write-multicol resume-parsed fld))))
+              (= style "list")
+              (do
+                (println "LIST FOUND IN" (string/upper-case strfld))
+                (println (write-multicol resume-parsed fld))
+                (recur (inc cnt) (str res (write-list resume-parsed fld))))
               (= style "summary")
             (do
               (println "SUMMARY FOUND IN" (string/upper-case strfld))
@@ -249,6 +279,5 @@
                                           (write-experience-nested resume-parsed fld)
                                           (write-experience resume-parsed fld)))))
             :else (do
-                    (println "banner not found in" strfld)
                     (recur (inc cnt) res)))))
         res)))
