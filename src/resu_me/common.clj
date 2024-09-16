@@ -1,18 +1,10 @@
 (ns resu-me.common
-  (:require [clojure.string :as string]
-            [clojure.java.io :as io]))
+  (:require [clojure.string :as string]))
 
 (defn stringify-key
   [k]
   (string/replace
    (str k) ":" ""))
-
-(defn parse-seq
-  "internal fucntion, to turn coll into a list of `\\item`. call to it may look something like:
-  (list-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
-  [lst cmd]
-  (apply str
-         (map #(cmd %) lst)))
 
 (defn parse-section
   [resume-parsed section subsection]
@@ -31,16 +23,6 @@
   [resume-parsed section subsection cnt]
   (get-in resume-parsed [section (keyword (str cnt)) subsection]))
 
-(defn skills?
-  [resume-parsed]
-  (get-in resume-parsed [:has_skill]))
-
-(defn education-highlights?
-  [resume-parsed]
-  (get-in resume-parsed [:Education_Section :highlights]))
-
-
-
 (defn latex-command
                 [command &{:keys [args opts body]
                            :or {args nil opts nil body nil}}]
@@ -58,7 +40,6 @@
                         (str " " body))
                       "\n"))
 
-;; TODO
 (defn new-command
   [command definition
    &{:keys [number-args default-arg starred?]
@@ -86,16 +67,14 @@
                  :opts (first opts)))
 
 (defn render-item
-                ([body]
-                 (latex-command "item"
-                                       :body body))
-                ([body opts]
-                 (latex-command "item"
-                                :body body
-                                :opts opts)))
+  ([body]
+   (latex-command "item"
+                  :body body))
+  ([body opts]
+   (latex-command "item"
+                  :body body
+                  :opts opts)))
 
-;;bandage until i can figure out how to properly recur on nested maps
-;;so that i can pass args such as (parse list '("test 1" (list "test 2" ["arg"]) "3"))
 (defn item-list
   "internal fucntion, to turn coll into a list of `\\item`. call to it may look something like:
   (list-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"

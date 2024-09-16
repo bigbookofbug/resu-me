@@ -3,9 +3,6 @@
             [clojure.string :as string]
             [resu-me.common :as common]))
 
-;; TODO
-;; - main parser (and preamble parser in core)
-
 (defn write-preamble
   [resume-parsed section]
   (let [ltx common/latex-command]
@@ -141,106 +138,6 @@
      (ltx 'pagestyle
           :args ['empty]))))
 
-;(defn write-banner-old
-;  [resume-parsed]
-;  (common/latex-begin 'center
-;                      (str "{\n"
-;                           (common/latex-command 'fontsize :args [36 12])
-;                           (common/latex-command 'fontseries
-;                                                 :args ['heavy]
-;                                                 :body (common/latex-command 'selectfont))
-;                           (common/latex-command 'color
-;                                                 :args ['accent]
-;                                                 :body (str
-;                                                        (get-in resume-parsed
-;                                                                [:Personal :name])))
-;                           "} \\\\" (common/latex-command 'medskip)
-;                           (common/quad-list
-;                            (get-in resume-parsed [:Personal :contact])))))
-;
-;(defn write-education
-;  [resume-parsed]
-;  (str
-;   (common/latex-command 'section :args ['Education])
-;   (common/latex-command 'subsection
-;                         :args
-;                         [(apply str (map #(string/trim-newline %)
-;                                              (list
-;                                               (common/parse-education
-;                                                resume-parsed
-;                                                :institute)
-;                                               " "
-;                                               (common/latex-command
-;                                                'aux
-;                                                :args [(str (common/parse-education
-;                                                             resume-parsed
-;                                                             :degree)
-;                                                            " in "
-;                                                            (common/parse-education
-;                                                             resume-parsed
-;                                                             :area))]) " "
-;                                               (common/latex-command
-;                                                'rside
-;                                                :args
-;                                                [(str (common/parse-education
-;                                                       resume-parsed
-;                                                       :start)
-;                                                      " -- "
-;                                                      (common/parse-education
-;                                                       resume-parsed
-;                                                       :end))]))))])
-;   (if (common/education-highlights? resume-parsed)
-;     (str
-;       (common/latex-begin '[itemize]
-;                            (common/item-list
-;                             (get-in resume-parsed
-;                                     [:Education_Section :highlights]))))
-;      (println "Skipping education highlights ..."))))
-
-;(defn write-experience-old
-;  [resume-parsed]
-;  (str (common/latex-command 'section :args ['Experience])
-;       (str (loop [cnt 1
-;                   res nil]
-;              (let [parse-exp
-;                    #(common/parse-experience resume-parsed % cnt)]
-;                (if (>= (count (get-in resume-parsed [:Experience]))
-;                        cnt)
-;                  (let [new-res
-;                        (str
-;                         (common/latex-command
-;                          'subsection
-;                          :args
-;                          [(str (parse-exp
-;                                 :company)
-;                                (common/latex-command
-;                                 'rside
-;                                 :args [(str
-;                                         (parse-exp
-;                                          :location))]))])
-;                         (common/latex-command
-;                          'subsubsection
-;                          :args
-;                          [(str (parse-exp
-;                                 :title)
-;                                (common/latex-command
-;                                 'rside
-;                                 :args [(str
-;                                         (parse-exp
-;                                          :start)
-;                                         " -- "
-;                                         (parse-exp
-;                                          :end))]))])
-;                         (common/latex-begin 'itemize
-;                                             (common/item-list
-;                                              (parse-exp :duties))))]
-;                    (recur (inc cnt) (str res new-res)))
-;                  res))))))
-;;;;;;;;;
-;;;NEW;;;
-;;;;;;;;;
-
-;; TODO
 (defn write-experience-nested
   [resume-parsed section]
   (str (common/latex-command 'section :args [(common/stringify-key section)])
@@ -421,13 +318,3 @@
             :else (do
                     (recur (inc cnt) res)))))
         res)))
-
-;; need to, for the parse loop, figure out a way to write the preamble
-;; probs an on/off switch like (preamble-written?)
-;; that, or store title i meta as well -- this might be the way tbh
-;(cond
-;  (= style "banner")
-;  (do
-;    (println "BANNER FOUND IN" (string/upper-case strfld))
-;    (println (write-banner resume-parsed fld))
-;    (recur (inc cnt) (str res (write-banner resume-parsed fld))))

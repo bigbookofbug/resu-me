@@ -16,18 +16,6 @@
                   (bugstyle/write-preamble)
                   (common/document
                    (bugstyle/parse-to-bugstyle resume-parsed)))))
- ;                  (bugstyle/write-header resume-parsed)
- ;                  (Thread/sleep 500)
- ;                  (bugstyle/write-summary resume-parsed)
- ;                  (bugstyle/write-education resume-parsed)
- ;                  (bugstyle/write-experience resume-parsed)
- ;                  (println "checking for skills...")
- ;                  (Thread/sleep 500)
- ;                  (if (common/skills? resume-parsed)
- ;                    (do
- ;                      (println "skills found, writing.")
- ;                      (bugstyle/write-skills resume-parsed))
- ;                    (println "no skill detected"))))))
   (println "complete! file saved to" file))
 
 (defn write-star-rover
@@ -49,8 +37,8 @@
                                          (star-rover/write-preamble resume-parsed
                                                                     fld))
                                 (recur (inc cnt) (str res (star-rover/write-preamble
-                                                          resume-parsed
-                                                          fld))))
+                                                           resume-parsed
+                                                           fld))))
                             (recur (inc cnt) res))))
                       res))
                   (common/document
@@ -85,10 +73,25 @@
 (defn make-pdf
   [file]
   (println "generating pdf . . .")
-  (shell/sh "pdflatex"
+  (Thread/sleep 1000)
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println "LATEX OUTPUT:")
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println :out (shell/sh "pdflatex"
             (str "-output-directory="
                  (string/trim-newline (get (shell/sh "dirname" file) :out)))
             (str file)))
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println "END LATEX OUTPUT")
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*")))
+  (println (apply str (repeat 80 "*"))))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -106,7 +109,6 @@
             (get-in options [:config]))
           tex-file
           (str (System/getenv "PWD") "/" "resume.tex")]
-                                        ;    (print resume-parsed)
       (overwrite-dupe tex-file)
       (get-template tex-file resume-parsed)
       (if (nil? (get-in options [:no-pdf]))
