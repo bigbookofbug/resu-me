@@ -136,54 +136,49 @@
                                        :args (common/stringify-key section)))])
     line-sep)))
 
+(defn write-experience-any
+  [section-cmd]
+  (common/flush-direction
+   'left
+   (common/latex-command
+    'setstretch
+    :args [0.5
+           (str (common/latex-command
+                 'textbf
+                 :args (str (section-cmd :company)))
+                (if (empty?
+                     (section-cmd :location))
+                  nil
+                  (str (section-cmd :location)))
+                (common/latex-command 'hfill)
+                (common/latex-command
+                 'textbf
+                 :args (str
+                        (if (not (empty? (section-cmd :start)))
+                          (str (section-cmd :start)
+                               " --- "))
+                        (section-cmd :end))))])
+   (common/latex-command 'newline)
+   (common/latex-command
+    'textit
+    :args (section-cmd :title))
+   (if (not (empty? (section-cmd :list)))
+     (common/latex-begin 'itemize
+                         (common/item-list
+                          (section-cmd :list)
+                          ))
+     nil)))
+
 (defn write-experience
   [resume-parsed section]
   (str
    (write-experience-header section)
-   (common/flush-direction
-    'left
-    (common/latex-command
-     'setstretch
-     :args [0.5
-            (str (common/latex-command
-                  'textbf
-                  :args (str (common/parse-section
-                              resume-parsed
-                              section :company) (if (empty?
-                                                     (common/parse-section
-                                                      resume-parsed
-                                                      section :location))
-                                                  nil
-                                                  (str ", "
-                                                       (common/parse-section
-                                                        resume-parsed
-                                                        section :location)))
-                             (common/latex-command 'hfill)
-                             (common/latex-command
-                              'textbf
-                              :args (str
-                                     (if (not (empty? (common/parse-section
-                                                       resume-parsed section
-                                                       :start)))
-                                       (str
-                                        (common/parse-section
-                                         resume-parsed section
-                                         :start)
-                                         " --- "))
-                                         (common/parse-section resume-parsed
-                                                               section :end))))))])
-    (common/latex-command 'newline)
-    (common/latex-command
-     'textit
-     :args (common/parse-section resume-parsed
-                                 section :title))
-    (if (not (empty? (common/parse-section resume-parsed section :list)))
-      (common/latex-begin 'itemize
-                          (common/item-list
-                           (get-in
-                            resume-parsed [section
-                            :list])))
-      nil))))
+   (let [parse-exp #(if (= % :list)
+                      (get-in resume-parsed [section %])
+                      (common/parse-section resume-parsed section %))]
+     (write-experience-any parse-exp))))
+
+
 
 (defn write-experience-nested
   [resume-parsed section]
@@ -196,36 +191,7 @@
             (if (>= (count (get-in resume-parsed [section]))
                     cnt)
               (let [new-res
-                    (common/flush-direction
-                     'left
-                     (common/latex-command
-                      'setstretch
-                      :args [0.5
-                             (str (common/latex-command
-                                   'textbf
-                                   :args (str (parse-exp :company)))
-                                  (if (empty?
-                                       (parse-exp :location))
-                                    nil
-                                    (str (parse-exp :location)))
-                                  (common/latex-command 'hfill)
-                                  (common/latex-command
-                                   'textbf
-                                   :args (str
-                                          (if (not (empty? (parse-exp :start)))
-                                            (str (parse-exp :start)
-                                                 " --- "))
-                                          (parse-exp :end))))])
-                     (common/latex-command 'newline)
-                     (common/latex-command
-                      'textit
-                      :args (parse-exp :title))
-                     (if (not (empty? (parse-exp :list)))
-                         (common/latex-begin 'itemize
-                                         (common/item-list
-                                          (parse-exp :list)
-                                          ))
-                         nil))]
+                    (write-experience-any parse-exp)]
                 (recur (inc cnt) (str res new-res)))
               res))))))
 
@@ -238,12 +204,12 @@
            (- (count (keys resume-parsed)) 1)
            cnt)
         (let [fld (nth (keys resume-parsed) cnt)
-              strfld (common/stringify-key fld)]
-          (let [style (if (common/is-nested? resume-parsed fld)
-                        (string/lower-case (str (get-in resume-parsed
-                                                        [fld :1 :style])))
-                        (string/lower-case (str
-                                            (get-in resume-parsed [fld :style]))))]
+              strfld (common/stringify-key fld)
+              style (if (common/is-nested? resume-parsed fld)
+                      (string/lower-case (str (get-in resume-parsed
+                                                      [fld :1 :style])))
+                      (string/lower-case (str
+                                          (get-in resume-parsed [fld :style]))))]
             (cond
               (= style "banner")
               (do
@@ -275,5 +241,5 @@
                                           (write-experience-nested resume-parsed fld)
                                           (write-experience resume-parsed fld)))))
             :else
-            (recur (inc cnt) res))))
+            (recur (inc cnt) res)))
         res)))

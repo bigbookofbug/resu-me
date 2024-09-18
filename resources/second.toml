@@ -49,7 +49,7 @@ list = [
 
 [Experience.1]
 style = "experience"
-company = "\\begin{itemize} Bug enterprise, inc"
+company = "Bug enterprise, inc"
 location = "New York, New York"
 title = "Engineer Team Lead"
 start = "August 2021"
