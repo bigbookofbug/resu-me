@@ -26,19 +26,19 @@
 (defn latex-command
                 [command &{:keys [args opts body]
                            :or {args nil opts nil body nil}}]
-                (str "\\" command
-                      (if (nil? opts)
-                        ""
-                        (str "[" (string/join ", " opts) "]"))
-                      (if (nil? args)
-                        ""
-                        (if (sequential? args)
-                          (apply str (map #(str "{"%"}") args))
-                          (str "{"args"}")))
-                      (if (nil? body)
-                        ""
-                        (str " " body))
-                      "\n"))
+  (str "\\" command
+       (if (nil? opts)
+         ""
+         (str "[" (string/join ", " opts) "]"))
+       (if (nil? args)
+         ""
+         (if (sequential? args)
+           (apply str (map #(str "{"%"}") args))
+           (str "{"args"}")))
+       (if (nil? body)
+         ""
+         (str " " body))
+       "\n"))
 
 (defn new-command
   [command definition
@@ -55,6 +55,23 @@
          (str "["(string/join ", " default-arg)"]"))
        "{"definition"}"))
 
+;; TODO
+;; macro these three together ?
+;; maybe something like:
+(comment
+  (defmacro deftex [names]
+    (let [func-name (string/replace
+                     (string/replace
+                      (str names) "latex-" "")
+                     "-" "")]
+      `(defn ~(symbol (name names))
+         [args & opts]
+         (latex-command ~func-name
+                        :args args
+                        :opts (first opts))))))
+;;; figure out how to prevent this from error-ing out
+
+
 (defn use-package
   [package & opts]
   (latex-command "usepackage"
@@ -67,23 +84,20 @@
                  :opts (first opts)))
 
 (defn render-item
-  ([body]
-   (latex-command "item"
-                  :body body))
-  ([body opts]
+  ([body & opts]
    (latex-command "item"
                   :body body
                   :opts opts)))
 
 (defn item-list
-  "internal fucntion, to turn coll into a list of `\\item`. call to it may look something like:
+  "Internal fucntion, to turn coll into a list of `\\item`. call to it may look something like:
   (list-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
   [lst]
   (apply str
          (map #(render-item %) lst)))
 
 (defn quad-list
-  "internal fucntion, to turn a coll into a list of `\\quad`. call to it may look something like:
+  "Internal fucntion, to turn a coll into a list of `\\quad`. call to it may look something like:
   (parse-list (get-in resume-parsed [:Personal :contact]) 0 file/path)"
   [lst]
   (apply str
@@ -105,16 +119,18 @@
                                     command))))
 
 (defn flush-direction
-  "single function that allows for flushing left or write in LaTex - with the 'body' arg being the contents within the flush"
+  "Single function that allows for flushing left or write in LaTex - with the 'body' arg being the contents within the flush"
   [direction & body]
   (latex-begin (str "flush" direction)
                (apply str body)))
 
 (defn document
   [& body]
-  (latex-begin 'document (apply str body)))
+  (latex-begin 'document
+               (apply str body)))
 
 (defn key-depth
+  "Helper function for `is-nested?` which is used to detect keys in the map that have additional maps as their value"
   ([m]
    (key-depth m 0))
   ([m depth]
@@ -126,6 +142,7 @@
      {} m)))
 
 (defn is-nested?
+  "Return true for any key whos value is also a map"
   [resume-parsed k]
   (every? true?
           (map #(map? %)

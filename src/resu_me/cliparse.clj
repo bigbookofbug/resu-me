@@ -8,26 +8,15 @@
   "If it exists, parse the initial config file into clj map.
   This will allow transformation into .toml and latex later.
   If no file is provided, searches for a \"resume.toml\" in the pwd"
-  ([file]
-  (cond (false? (.exists (io/file file))) (do
-                                            (println "File doesn't exist!")
-                                            (System/exit 0))
-        (nil? (re-find #"\.toml$" file)) (do
-                                           (println "Please provide a .toml file.")
-                                           (System/exit 0))
-        :else (with-open [reader (io/reader file)]
-                (toml/read reader {:key-fn keyword}))))
-  ([]
-   (let [file
-         (str (System/getenv "PWD") "/" "resume.toml")]
-     (cond (false? (.exists (io/file file))) (do
-                                               (println "File doesn't exist!")
-                                               (System/exit 0))
-           (nil? (re-find #"\.toml$" file)) (do
-                                              (println "Please provide a .toml file.")
-                                              (System/exit 0))
-           :else (with-open [reader (io/reader file)]
-                   (toml/read reader {:key-fn keyword}))))))
+  [file]
+  (if (or
+       (nil? (re-find #"\.toml$" file))
+       (false? (.exists (io/file file))))
+    (do
+      (println "No valid .toml file found!")
+      (System/exit 0))
+    (with-open [reader (io/reader file)]
+      (toml/read reader {:key-fn keyword}))))
 
 (defn spit-file
   "Hacky method of handling relative paths"
@@ -40,6 +29,7 @@
     :else (str (System/getenv "PWD") "/" file)))
 
 (def cli-opts
+;; TODO
   [
    ["-c" "--config CONFIG"
     "TOML config file for resume. If no file is provided, program will search for a \"resume.toml\" file in the pwd."

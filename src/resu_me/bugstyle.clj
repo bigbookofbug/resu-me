@@ -4,10 +4,6 @@
             [resu-me.common :as common]))
 
 ;; TODO
-;; Set it up so that headers are their own function
-;; (similar to how write-experience-header is)
-
-;; TODO
 ;; separate out list into switch for sections
 ;; that allows for multicol support on all sections (high-level maybe)
 
@@ -278,6 +274,6 @@
               (recur (inc cnt) (str res (if (common/is-nested? resume-parsed fld)
                                           (write-experience-nested resume-parsed fld)
                                           (write-experience resume-parsed fld)))))
-            :else (do
-                    (recur (inc cnt) res)))))
+            :else
+            (recur (inc cnt) res))))
         res)))
