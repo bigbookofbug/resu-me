@@ -22,5 +22,5 @@ this is the first official "testing" release of the `resu-me` project. This rele
 
 - expect frequent and potentially breaking changes on the `master` branch as the project is still under development. stable changes will be pushed to the `stable` branch after thorough testing.
 
-[Unreleased]: https://sourcehost.site/your-name/resu-me/compare/0.1.1...HEAD
-[0.1.1]: https://sourcehost.site/your-name/resu-me/compare/0.1.0...0.1.1
+[Unreleased]: https://gitlab.com/bigbookfbug/resu-me/compare/0.1.1...HEAD
+[0.1.1]: https://gitlab.com/bigbookofbug/resu-me/compare/0.1.0...0.1.1
