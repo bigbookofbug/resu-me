@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [resu-me.bugstyle :as bugstyle]
             [resu-me.star-rover :as star-rover]
+            [resu-me.stylish :as stylish]
             [resu-me.common :as common]
             [resu-me.cliparse :as cli]
             [clojure.string :as string]
@@ -45,6 +46,33 @@
                    (star-rover/parse-to-star-rover resume-parsed)))))
   (println "Complete! file saved to" file))
 
+(defn write-stylish
+  [file resume-parsed]
+  (println "Using template \"Stylish\"...")
+  (with-open [wrtr (io/writer file :append true)]
+    (.write wrtr (str
+                  (loop [cnt 0
+                         res nil]
+                    (if (>=
+                         (- (count (keys resume-parsed)) 1)
+                         cnt)
+                      (let [fld (nth (keys resume-parsed) cnt)
+                            style (string/lower-case
+                                     (str
+                                      (get-in resume-parsed [fld :style])))]
+                          (if (= style "meta")
+                            (do (println "PREAMBLE\n"
+                                         (stylish/write-preamble resume-parsed
+                                                                    fld))
+                                (recur (inc cnt) (str res (stylish/write-preamble
+                                                           resume-parsed
+                                                           fld))))
+                            (recur (inc cnt) res)))
+                      res))
+                  (common/document
+                   (common/latex-begin 'center
+                   (stylish/parse-to-stylish resume-parsed))))))
+  (println "Complete! file saved to" file))
 ;; Maybe take a look at the templates in this repo for inspiration
 ;; https://github.com/subidit/rover-resume
 (defn get-template
@@ -74,6 +102,9 @@ title = 'Bug Bugson'"))
                   (= (string/lower-case template)
                      "bugstyle")
                   (write-bugstyle file resume-parsed)
+                  (= (string/lower-case template)
+                     "stylish")
+                  (write-stylish file resume-parsed)
                   (= (string/lower-case template)
                      "star rover")
                   (write-star-rover file resume-parsed))))

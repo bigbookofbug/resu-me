@@ -17,8 +17,13 @@
 
 [Template]
 style = "Meta"
-template = "bugstyle"
+template = "stylish"
 title = "Bug Bugson"
+list = [
+"555-555-5555",
+"ema@ail.com",
+"mywebsite.site"
+]
 
 [Personal]
 style = "banner"
@@ -83,13 +88,13 @@ list = [
 "\\textbf{Resu-Me Resume Parser} lead developer \\hfill 2024"
 ]
 
-[Skills]
-style = "list"
-list = [
-"Proficient in GNU/Linux operating system installation and maintenance.",
-"Understanding and enjoyment of the C and Clojure programming languages.",
-"Experience with catching and releasing spiders instead of squishing them.",
-"Proficient working both alone and in a team-oriented environment."
-]
+#[Skills]
+#style = "list"
+#list = [
+#"Proficient in GNU/Linux operating system installation and maintenance.",
+#"Understanding and enjoyment of the C and Clojure programming languages.",
+#"Experience with catching and releasing spiders instead of squishing them.",
+#"Proficient working both alone and in a team-oriented environment."
+#]
 
 

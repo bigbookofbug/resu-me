@@ -14,6 +14,7 @@
      (apply str (map #(common/use-package %)
                      (list 'scrlayer-scrpage
                            'titlesec
+                           'multicol
                            'marvosym
                            'ebgaramond
                            'microtype
@@ -28,7 +29,6 @@
                  ""
                  "0em"
                  ""])
-     "[titlerule]\n"
      (ltx 'pagestyle
           :args ['scrheadings])
      (ltx 'addtolength
@@ -48,6 +48,8 @@
                                        'normalfont
                                        'rmfamily
                                        'scshape)))])
+;;; TODO - Ensure that this is listed in the args - per the main code
+;;; do the same for the star rover preamb
      (ltx 'cofoot
           :args [(str (ltx 'fontsize
                       :args [12.5
@@ -56,6 +58,155 @@
                  (ltx 'textls
                       :opts [150]
                       :body (apply str
-                                    (interpose " "
+                                    (interpose " {\\large\\textperiodcentered} "
                                                (get-in resume-parsed
                                                        [section :list])))))]))))
+
+;; TODO - wrap this as a `\begin{center}` arg
+(defn write-banner
+  [resume-parsed section]
+  (str "{"
+   (common/latex-command 'fontsize
+                         :args [36
+                                36])
+   (common/latex-command 'selectfont)
+   (common/latex-command 'scshape)
+   (common/latex-command 'textls
+                         :opts [200]
+                         :args [(common/parse-section
+                                 resume-parsed
+                                 section
+                                 :title)]) "}"
+   (common/latex-command 'vspace
+                         :args ["1.5cm"])))
+
+(defn write-summary
+  [resume-parsed section]
+  (str
+   (common/latex-command 'section
+                         :args (common/stringify-key section))
+   (common/parse-section
+          resume-parsed
+          section
+          :list)))
+
+(defn write-experience-any
+  [section-cmd]
+  (let [ltx common/latex-command]
+    (str
+     (common/flush-direction 'left
+     (ltx 'textbf
+          :args (str
+                 (section-cmd :company)
+                 (string/trim-newline (ltx 'hfill))
+                 " "
+                 (if (not (empty? (section-cmd :start)))
+                   (str (section-cmd :start)
+                        " --- "))
+                 (section-cmd :end)))
+     (ltx 'newline)
+     (ltx 'textbf
+          :args
+          (str
+           (section-cmd :title)
+           (if (empty? (section-cmd :location))
+             nil
+             (ltx 'hfill
+                  :body (str (section-cmd :location)))))))
+     (if (not (empty? (section-cmd :list)))
+       (common/latex-begin ['multicols 2]
+       (common/latex-begin 'itemize
+                           (common/item-list
+                            (section-cmd :list))))
+       nil)
+     (ltx 'vspace
+          :args ["12pt"]))))
+
+(defn write-experience
+  [resume-parsed section]
+  (str
+   (common/latex-command 'section
+                         :args [(common/stringify-key section)])
+   (let [parse-exp #(if (= % :list)
+                      (get-in resume-parsed [section %])
+                      (common/parse-section resume-parsed section %))]
+     (write-experience-any parse-exp))))
+
+(defn write-experience-nested
+  [resume-parsed section]
+  (str (common/latex-command 'section :args [(common/stringify-key section)])
+       (str (loop [cnt 1
+                   res nil]
+              (let [parse-exp
+                    #(common/parse-experience-nested resume-parsed section % cnt)]
+                (if (>= (count (get-in resume-parsed [section]))
+                        cnt)
+                  (let [new-res
+                        (write-experience-any parse-exp)]
+                    (recur (inc cnt) (str res new-res)))
+                  res))))))
+
+(defn write-list
+  [resume-parsed section]
+  (str
+   (common/latex-command 'section :args [(common/stringify-key section)])
+   (common/latex-begin '[itemize]
+                         (common/item-list
+                          (get-in resume-parsed
+                                  [section :list])))))
+(defn write-multicol
+  [resume-parsed section]
+  (str
+   (common/latex-command 'section :args [(common/stringify-key section)])
+   (common/latex-begin ['multicols 2]
+    (common/latex-begin '[itemize]
+                         (common/item-list
+                          (get-in resume-parsed
+                                  [section :list]))))))
+
+(defn parse-to-stylish
+  [resume-parsed]
+  (loop [cnt 0
+         res nil]
+      (if (>=
+           (- (count (keys resume-parsed)) 1)
+           cnt)
+        (let [fld (nth (keys resume-parsed) cnt)
+              strfld (common/stringify-key fld)
+              style (if (common/is-nested? resume-parsed fld)
+                      (string/lower-case (str (get-in resume-parsed
+                                                      [fld :1 :style])))
+                      (string/lower-case (str
+                                          (get-in resume-parsed [fld :style]))))]
+            (cond
+              (= style "banner")
+              (do
+                (println "BANNER FOUND IN" (string/upper-case strfld))
+                (println (write-banner resume-parsed fld))
+                (recur (inc cnt) (str res (write-banner resume-parsed fld))))
+              (= style "multicol")
+              (do
+                (println "MULTICOL FOUND IN" (string/upper-case strfld))
+                (println (write-multicol resume-parsed fld))
+                (recur (inc cnt) (str res (write-multicol resume-parsed fld))))
+              (= style "list")
+              (do
+                (println "LIST FOUND IN" (string/upper-case strfld))
+                (println (write-multicol resume-parsed fld))
+                (recur (inc cnt) (str res (write-list resume-parsed fld))))
+              (= style "summary")
+            (do
+              (println "SUMMARY FOUND IN" (string/upper-case strfld))
+              (println (write-summary resume-parsed fld))
+              (recur (inc cnt) (str res (write-summary resume-parsed fld))))
+            (= style "experience")
+            (do
+              (println "EXPERIENCE FOUND IN" (string/upper-case strfld))
+              (println (if (common/is-nested? resume-parsed fld)
+                         (write-experience-nested resume-parsed fld)
+                         (write-experience resume-parsed fld)))
+              (recur (inc cnt) (str res (if (common/is-nested? resume-parsed fld)
+                                          (write-experience-nested resume-parsed fld)
+                                          (write-experience resume-parsed fld)))))
+            :else (recur (inc cnt) res)))
+        res)))

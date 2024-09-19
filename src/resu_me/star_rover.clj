@@ -138,6 +138,38 @@
      (ltx 'pagestyle
           :args ['empty]))))
 
+(defn write-experience-any
+  [section-cmd]
+  (str
+   (common/latex-command
+    'subsection
+    :args
+    [(str (section-cmd :company)
+          (if (empty?
+               (section-cmd :location))
+            nil
+            (common/latex-command
+             'rside
+             :args [(str
+                     (section-cmd :location))])))])
+   (common/latex-command
+    'subsubsection
+    :args
+    [(str (section-cmd :title)
+          (common/latex-command
+           'rside
+           :args [(str
+                   (if (not (empty? (section-cmd :start)))
+                     (str (section-cmd :start)
+                          " -- "))
+                   (section-cmd :end))]))])
+   (if (not (empty? (section-cmd :list)))
+     (common/latex-begin 'itemize
+                         (common/item-list
+                          (section-cmd :list)))
+     nil)))
+
+
 (defn write-experience-nested
   [resume-parsed section]
   (str (common/latex-command 'section :args [(common/stringify-key section)])
@@ -148,36 +180,7 @@
                 (if (>= (count (get-in resume-parsed [section]))
                         cnt)
                   (let [new-res
-
-                        ;;; TODO - sub out appr calls w/ `parse-exp`
-                        (str
-                         (common/latex-command
-                          'subsection
-                          :args
-                          [(str (parse-exp :company)
-                                (if (empty?
-                                     (parse-exp :location))
-                                  nil
-                                  (common/latex-command
-                                   'rside
-                                   :args [(str
-                                           (parse-exp :location))])))])
-                         (common/latex-command
-                          'subsubsection
-                          :args
-                          [(str (parse-exp :title)
-                                (common/latex-command
-                                 'rside
-                                 :args [(str
-                                         (if (not (empty? (parse-exp :start)))
-                                           (str (parse-exp :start)
-                                                " -- "))
-                                         (parse-exp :end))]))])
-                         (if (not (empty? (parse-exp :list)))
-                           (common/latex-begin 'itemize
-                                               (common/item-list
-                                                (parse-exp :list)))
-                           nil))]
+                        (write-experience-any parse-exp)]
                     (recur (inc cnt) (str res new-res)))
                   res))))))
 
@@ -185,47 +188,10 @@
   [resume-parsed section]
   (str
    (common/latex-command 'section :args [(common/stringify-key section)])
-   (common/latex-command
-    'subsection
-    :args
-    [(str (common/parse-section
-           resume-parsed
-           section :company)
-          (if (empty?
-             (common/parse-section
-              resume-parsed
-              section :location))
-          nil
-          (common/latex-command
-           'rside
-         :args [(str
-                 (common/parse-section
-                  resume-parsed
-                  section :location))])))])
- (common/latex-command
-  'subsubsection
-  :args
-  [(str (common/parse-section
-         resume-parsed
-         section :title)
-        (common/latex-command
-         'rside
-         :args [(str
-                 (if (not (empty? (common/parse-section
-                                   resume-parsed section :start)))
-                 (str (common/parse-section
-                       resume-parsed section
-                       :start)
-                 " -- "))
-                 (common/parse-section resume-parsed
-                                       section :end))]))])
-(if (not (empty? (common/parse-section resume-parsed section :list)))
- (common/latex-begin 'itemize
-                     (common/item-list
-                      (get-in
-                       resume-parsed [section
-                                      :list])))
- nil)))
+   (let [parse-exp #(if (= % :list)
+                      (get-in resume-parsed [section %])
+                      (common/parse-section resume-parsed section %))]
+     (write-experience-any parse-exp))))
 
 (defn write-banner
   [resume-parsed section]
@@ -279,12 +245,12 @@
            (- (count (keys resume-parsed)) 1)
            cnt)
         (let [fld (nth (keys resume-parsed) cnt)
-              strfld (common/stringify-key fld)]
-          (let [style (if (common/is-nested? resume-parsed fld)
-                        (string/lower-case (str (get-in resume-parsed
-                                                        [fld :1 :style])))
-                        (string/lower-case (str
-                                            (get-in resume-parsed [fld :style]))))]
+              strfld (common/stringify-key fld)
+              style (if (common/is-nested? resume-parsed fld)
+                      (string/lower-case (str (get-in resume-parsed
+                                                      [fld :1 :style])))
+                      (string/lower-case (str
+                                          (get-in resume-parsed [fld :style]))))]
             (cond
               (= style "banner")
               (do
@@ -315,6 +281,5 @@
               (recur (inc cnt) (str res (if (common/is-nested? resume-parsed fld)
                                           (write-experience-nested resume-parsed fld)
                                           (write-experience resume-parsed fld)))))
-            :else (do
-                    (recur (inc cnt) res)))))
+            :else (recur (inc cnt) res)))
         res)))

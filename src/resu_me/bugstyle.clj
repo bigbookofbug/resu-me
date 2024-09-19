@@ -165,8 +165,7 @@
    (if (not (empty? (section-cmd :list)))
      (common/latex-begin 'itemize
                          (common/item-list
-                          (section-cmd :list)
-                          ))
+                          (section-cmd :list)))
      nil)))
 
 (defn write-experience
