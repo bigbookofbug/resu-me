@@ -48,21 +48,31 @@
                                        'normalfont
                                        'rmfamily
                                        'scshape)))])
-;;; TODO - Ensure that this is listed in the args - per the main code
-;;; do the same for the star rover preamb
      (ltx 'cofoot
           :args [(str (ltx 'fontsize
                       :args [12.5
                              17])
                  (ltx 'selectfont)
-                 (ltx 'textls
-                      :opts [150]
-                      :body (apply str
-                                    (interpose " {\\large\\textperiodcentered} "
-                                               (get-in resume-parsed
-                                                       [section :list])))))]))))
+   (if (empty? (get-in resume-parsed
+                [section
+                :list]))
+     (do (println (str "
+WARNING: Missing 'list' delcaration in the META field!
+If this was not intentional, please provide a 'title', like so:\n
+[Template]
+template = 'stylish'
+style = 'banner'
+title = 'Bug Bugson'
+list = ['555-555-555', 'ema@ail.com', 'myweb.site']
+"))
+         (Thread/sleep 3000))
+     (ltx 'textls
+          :opts [150]
+          :body (apply str
+                       (interpose " {\\large\\textperiodcentered} "
+                                  (get-in resume-parsed
+                                          [section :list]))))))]))))
 
-;; TODO - wrap this as a `\begin{center}` arg
 (defn write-banner
   [resume-parsed section]
   (str "{"
@@ -71,12 +81,25 @@
                                 36])
    (common/latex-command 'selectfont)
    (common/latex-command 'scshape)
+   (if (empty? (common/parse-section
+                resume-parsed
+                section
+                :title))
+     (do (println (str "
+ERROR: STYLISH reqires a 'title' delcaration in the BANNER field!
+Please provide a 'title', like so:\n
+[Banner]
+style = 'banner'
+title = 'Bug Bugson'
+list = ['555-555-555', 'ema@ail.com', 'myweb.site']
+"))
+          (System/exit 0))
    (common/latex-command 'textls
                          :opts [200]
                          :args [(common/parse-section
                                  resume-parsed
                                  section
-                                 :title)]) "}"
+                                 :title)])) "}"
    (common/latex-command 'vspace
                          :args ["1.5cm"])))
 

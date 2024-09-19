@@ -1,0 +1,84 @@
+\documentclass[a4paper, oneside, final]{scrartcl}
+\usepackage{scrlayer-scrpage}
+\usepackage{titlesec}
+\usepackage{multicol}
+\usepackage{marvosym}
+\usepackage{ebgaramond}
+\usepackage{microtype}
+\usepackage{tabularx,colortbl}
+\titleformat{\section
+}{\large
+\scshape
+\raggedright
+}{}{0em}{}
+\pagestyle{scrheadings}
+\addtolength{\voffset
+}{-0.5in}
+\addtolength{\textheight
+}{3cm}
+\newcommand{\gray
+}[0]{\rowcolor[gray]{.90}
+}\renewcommand{\headfont
+}{\normalfont
+\rmfamily
+\scshape
+}
+\cofoot{\fontsize{12.5}{17}
+\selectfont
+\textls[150] 555-555-5555 {\large\textperiodcentered} ema@ail.com {\large\textperiodcentered} mywebsite.site
+}
+\begin{document}
+\begin{center}
+{\fontsize{36}{36}
+\selectfont
+\scshape
+\textls[200]{Bug Bugson}
+}\vspace{1.5cm}
+\section{Summary}
+This is a summary of myself. This summary takes the form of a short paragraph that will go over relevant interests and skillsets. This can be used as a sort of "elevator pitch" for oneself, and should provide an overview of what one can do.\section{Education}
+\begin{flushleft}
+\textbf{University of Bug at Bugzone\hfill 2015 --- 2019}
+\newline
+\textbf{BS in Entymology}
+\end{flushleft}
+\vspace{12pt}
+\section{Experience}
+\begin{flushleft}
+\textbf{Bug enterprise, inc\hfill August 2021 --- Present}
+\newline
+\textbf{Engineer Team Lead\hfill New York, New York
+}
+\end{flushleft}
+\begin{multicols}{2}
+\begin{itemize}
+\item Lead and worked alongside a team of engineers in development of bugware
+\item Performed rigorous QA on developed software
+\item Met with stakeholders to ensure vision aligned with longterm goals of the project
+\end{itemize}
+\end{multicols}
+\vspace{12pt}
+\begin{flushleft}
+\textbf{Bugzone Department of Entymology\hfill September 2017 --- August 2019}
+\newline
+\textbf{Arachnid Fulfillment Intern\hfill Bugzone, USA
+}
+\end{flushleft}
+\begin{multicols}{2}
+\begin{itemize}
+\item Tracked the distribution of various arachnid species across local environment
+\item Drafted measures for preservation of threatened species
+\item Bit so many times that I developed an immunity to various neurotoxins
+\end{itemize}
+\end{multicols}
+\vspace{12pt}
+\section{Skills}
+\begin{multicols}{2}
+\begin{itemize}
+\item Proficient in GNU/Linux operating system installation and maintenance.
+\item Understanding and enjoyment of the C and Clojure programming languages.
+\item Experience with catching and releasing spiders instead of squishing them.
+\item Proficient working both alone and in a team-oriented environment.
+\end{itemize}
+\end{multicols}
+\end{center}
+\end{document}

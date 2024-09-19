@@ -6,3 +6,11 @@
 *.tex
 target/
 !.gitignore
+
+!bugstyle.toml
+!star-rover.toml
+!stylish.toml
+
+!bugstyle.tex
+!star-rover.tex
+!stylish.tex

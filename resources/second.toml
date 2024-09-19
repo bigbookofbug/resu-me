@@ -17,13 +17,13 @@
 
 [Template]
 style = "Meta"
-template = "stylish"
-title = "Bug Bugson"
-list = [
-"555-555-5555",
-"ema@ail.com",
-"mywebsite.site"
-]
+template = "bugstyle"
+#title = "Bug Bugson"
+#list = [
+#"555-555-5555",
+#"ema@ail.com",
+#"mywebsite.site"
+#]
 
 [Personal]
 style = "banner"

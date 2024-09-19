@@ -122,6 +122,19 @@
      (ltx 'fancyhf :args [""])
      (ltx 'renewcommand :args [(ltx 'headrulewidth)
                                "0pt"])
+(if (empty? (common/parse-section
+             resume-parsed
+                section
+                :title))
+  (do (println (str "
+ERROR: STAR ROVER reqires a 'title' delcaration in the META field!
+Please provide a 'title', like so:\n
+[Template]
+style = 'Meta'
+template = 'star rover'
+title = 'Bug Bugson'
+"))
+          (System/exit 0))
      (ltx 'fancyfoot
           :opts ['C]
           :args [(str (ltx 'small) (ltx 'color
@@ -134,7 +147,7 @@
                                                "\\ of "
                                                (string/trim-newline
                                                 (ltx 'pageref*
-                                                     :args ['LastPage])))))])
+                                                     :args ['LastPage])))))]))
      (ltx 'pagestyle
           :args ['empty]))))
 

@@ -1,0 +1,123 @@
+#########################################
+# design based off of:
+#########################################
+# Stylish Curriculum Vitae
+# LaTeX Template
+# Version 1.1 (September 10, 2021)
+#
+# This template originates from:
+# https://www.LaTeXTemplates.com
+#
+# Authors:
+# Stefano (https://www.kindoblue.nl)
+# Vel (vel@LaTeXTemplates.com)
+#
+# License:
+# CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+#
+#########################################
+#
+#
+#
+# STYLES:
+# Meta:
+#	for choosing the template information and setting configurations required for LaTeX preamble
+#
+# Banner:
+#	toplevel "banner" of the resume, containing things such as name and contact info
+#
+# Experience:
+#	for formatting sections such as education and work history
+#
+# Summary:
+#	paragraph-formatted text
+#
+# List, Multicol:
+#	single or multicolumned list
+
+# FIELDS:
+# The following have a strict set of values they can take:
+# 	* style:
+#		determines the "style" of the field from the styles listed above
+# 	* template:
+#		meta field which is used to determine the template to use for the LaTeX generation
+#
+# The following are less strict, so the examples provided are general recommendations rather than hard-and-fast requirements:
+# 	* title:
+#		field used to convey ones name, position in a company, or degree
+#	* company:
+#		the location of work, or school attended
+# 	* start:
+#		start date of experience. can be omitted entirely or set to whatever is desired
+#	* end:
+#		end date of experience. may be required for some fields.
+#	* location:
+#		recommended to be set to the geographical location of experience. not required in any fields.
+#	* list:
+#		describe details of experience. will be rendered as a list in all styles except "paragraph", where the first item of the array is rendered as the paragraph. this field MUST be written as an array.
+
+
+
+
+[Template]
+style = "Meta"
+template = "stylish"
+list = [	# stylish takes a list at the meta level for formatting the footer. not required but recommended.
+"555-555-5555",
+"ema@ail.com",
+"mywebsite.site"
+]
+
+
+[Personal]
+style = "banner"
+title = "Bug Bugson"
+
+[Summary]
+style = "summary"
+list = [
+"This is a summary of myself. This summary takes the form of a short paragraph that will go over relevant interests and skillsets. This can be used as a sort of \"elevator pitch\" for oneself, and should provide an overview of what one can do."]
+
+[Education]
+style = "experience"
+company = "University of Bug at Bugzone"
+title = "BS in Entymology"
+start = 2015
+end = 2019
+
+[Experience.1]
+style = "experience"
+company = "Bug enterprise, inc"
+location = "New York, New York"
+title = "Engineer Team Lead"
+start = "August 2021"
+end = "Present"
+list = [
+"Lead and worked alongside a team of engineers in development of bugware",
+"Performed rigorous QA on developed software",
+"Met with stakeholders to ensure vision aligned with longterm goals of the project"
+]
+
+[Experience.2]
+style = "experience"
+company = "Bugzone Department of Entymology"
+location = "Bugzone, USA"
+title = "Arachnid Fulfillment Intern"
+start = "September 2017"
+end = "August 2019"
+list = [
+"Tracked the distribution of various arachnid species across local environment",
+"Drafted measures for preservation of threatened species",
+"Bit so many times that I developed an immunity to various neurotoxins"
+]
+
+
+[Skills]
+style = "multicol"
+list = [
+"Proficient in GNU/Linux operating system installation and maintenance.",
+"Understanding and enjoyment of the C and Clojure programming languages.",
+"Experience with catching and releasing spiders instead of squishing them.",
+"Proficient working both alone and in a team-oriented environment."
+]
+
